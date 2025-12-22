@@ -1,0 +1,1 @@
+This repository contains the project for the Visual Analytics course.
