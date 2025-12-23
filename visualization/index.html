@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Music Evolution Dashboard</title>
+  <link type="text/css" rel="stylesheet" href="style.css"/>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body id="body" class="light">
+
+  <div id="all">
+    
+    <div class="area" id="toolbar">
+      <div class="title-bar-content">
+        <span class="dashboard-title pointer" onClick="window.location.reload();">Music Evolution</span>
+
+        <label class="control-label" for="x-axis-select">Bubble X:</label>
+        <select id="x-axis-select"></select>
+        
+        <label class="control-label" for="y-axis-select">Bubble Y:</label>
+        <select id="y-axis-select"></select>
+
+        <label class="control-label" for="group-by-select">Group By:</label>
+        <select id="group-by-select" style="margin-right: 20px;"></select>
+        
+        <span class="counter-wrapper">
+          <label>Songs: </label>
+          <b id="song_counter">0</b>
+        </span>
+      </div>
+    </div>
+
+    <div class="area" id="area_tsne">
+        <div class="chart-header">t-SNE Projection</div>
+    </div>
+
+    <div class="area" id="area_bubble">
+        <div class="chart-header">Mood Bubble Plot</div>
+    </div>
+
+    <div class="area" id="area_boxplot">
+        <div class="chart-header">Attribute Dist.</div>
+    </div>
+
+    <div class="area" id="area_pcp">
+        <div class="chart-header">Parallel Coordinates (Audio Profiles)</div>
+    </div>
+
+    <div class="area" id="area_bump">
+        <div class="chart-header">Genre Trends (Top 10)</div>
+    </div>
+
+  </div>
+   
+  <script type="module" src="main.js"></script>
+
+</body>
+</html>

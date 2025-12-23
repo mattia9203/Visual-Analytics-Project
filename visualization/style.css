@@ -1,0 +1,136 @@
+/* --- GLOBAL RESET --- */
+* {
+    box-sizing: border-box; /* Ensures borders don't break percentage widths */
+}
+
+body {
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  margin: 0;
+  overflow: hidden; 
+  background-color: white;
+  color: #333;
+  width: 100vw;
+  height: 100vh;
+}
+
+.pointer { cursor: pointer; }
+
+/* --- MAIN WRAPPER --- */
+#all {
+    width: 99vw;
+    height: 99vh;
+    position: absolute;
+    top: 0.5vh;
+    left: 0.5vw;
+}
+
+/* --- COMMON AREA STYLES --- */
+.area {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #333;
+  border-radius: 0.5vh; /* Responsive radius */
+}
+
+/* --- TOOLBAR STYLING --- */
+#toolbar {
+    width: 100%;
+    height: 5vh; /* Relative height */
+    top: 0;
+    left: 0;
+    background: #e9ecef;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #333;
+}
+
+.title-bar-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding-left: 1vw;
+}
+
+.dashboard-title {
+    font-weight: 700;
+    font-size: 2.2vh; /* Font scales with height */
+    color: #2c3e50;
+    margin-right: 2vw;
+    white-space: nowrap;
+}
+
+.control-label {
+    font-size: 1.6vh;
+    margin-right: 0.5vw;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+select {
+    font-size: 1.4vh;
+    padding: 0.2vh 0.4vw;
+    margin-right: 2vw;
+    border: 1px solid #aaa;
+    border-radius: 0.3vh;
+}
+
+.counter-wrapper {
+    margin-left: auto; /* Pushes to far right */
+    margin-right: 1vw;
+    font-size: 1.6vh;
+    display: flex;
+    align-items: center;
+    gap: 0.5vw;
+}
+
+/* --- CHART CONTAINERS (GRID LAYOUT) --- */
+
+/* Row 1 Top Positions */
+#area_tsne {
+    width: 38%;
+    height: 46vh;
+    top: 6vh; /* Below the 5vh toolbar + gap */
+    left: 0;
+}
+
+#area_bubble {
+    width: 41%;
+    height: 46vh;
+    top: 6vh;
+    left: 39%; /* 38% width + 1% gap */
+}
+
+#area_boxplot {
+    width: 19%;
+    height: 46vh;
+    top: 6vh;
+    left: 81%; /* 39% + 41% + gaps */
+}
+
+/* Row 2 Bottom Positions */
+#area_pcp {
+    width: 59%;
+    height: 46vh;
+    top: 53vh; /* 6vh (top) + 46vh (row1) + 1vh gap */
+    left: 0;
+}
+
+#area_bump {
+    width: 40%;
+    height: 46vh;
+    top: 53vh;
+    left: 60%;
+}
+
+/* --- CHART HEADERS --- */
+.chart-header {
+  position: absolute;
+  top: 1vh;
+  left: 1vw;
+  font-weight: 600;
+  font-size: 1.8vh; /* Responsive text size */
+  color: #555;
+  opacity: 0.8;
+  pointer-events: none;
+  z-index: 10;
+}

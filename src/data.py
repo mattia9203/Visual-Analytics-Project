@@ -3,10 +3,11 @@ import re
 from thefuzz import fuzz, process
 import time
 
+
 # --- CONFIGURATION ---
-DATA_SPOTIFY = "dataset/dataset.csv"
-DATA_BILLBOARD = "dataset/charts.csv"
-OUTPUT_FILE = "dataset/merged_common_songs.csv"
+DATA_SPOTIFY = "../dataset/dataset.csv"
+DATA_BILLBOARD = "../dataset/charts.csv"
+OUTPUT_FILE = "../dataset/merged_common_songs.csv"
 
 # --- 1. CLEANING FUNCTIONS ---
 def clean_song_title(title):
