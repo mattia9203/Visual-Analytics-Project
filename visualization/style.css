@@ -97,29 +97,29 @@ select {
     width: 41%;
     height: 46vh;
     top: 6vh;
-    left: 39%; /* 38% width + 1% gap */
+    left: 38%; /* 38% width + 1% gap */
 }
 
 #area_boxplot {
-    width: 19%;
+    width: 21%;
     height: 46vh;
     top: 6vh;
-    left: 81%; /* 39% + 41% + gaps */
+    left: 79%; /* 39% + 41% + gaps */
 }
 
 /* Row 2 Bottom Positions */
 #area_pcp {
     width: 59%;
     height: 46vh;
-    top: 53vh; /* 6vh (top) + 46vh (row1) + 1vh gap */
+    top: 52vh; /* 6vh (top) + 46vh (row1) + 1vh gap */
     left: 0;
 }
 
 #area_bump {
     width: 40%;
     height: 46vh;
-    top: 53vh;
-    left: 60%;
+    top: 52vh;
+    left: 59%;
 }
 
 /* --- CHART HEADERS --- */

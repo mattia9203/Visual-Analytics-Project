@@ -1,7 +1,5 @@
-// js/main.js
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 import { initBubblePlot, updateBubblePlot } from "./bubbleplot.js";
-
+import { initBoxPlots, updateBoxPlots } from "./boxplot.js";
 const DATA_PATH = "../dataset/final_imputed_data_normalized.csv"; 
 // Attributes available for analysis
 const AUDIO_FEATURES = ["danceability", "energy", "loudness", "speechiness", "acousticness", "instrumentalness", "liveness", "valence", "popularity", "Real_Year" ];
@@ -31,7 +29,20 @@ function loadData() {
         populateDropdowns();
         
         // Initialize with defaults
-        initBubblePlot("#area_bubble", globalData);
+        initBubblePlot("#area_bubble", globalData, (subsetData) => {
+            // Logic: If 'subsetData' exists, use it. Otherwise (deselect), use 'globalData'.
+            const dataToUse = subsetData || globalData;
+            
+            const xVal = d3.select("#x-axis-select").property("value");
+            const yVal = d3.select("#y-axis-select").property("value");
+
+            // Update BoxPlots with the drill-down data
+            updateBoxPlots(dataToUse, xVal, yVal);
+            
+            // Note: You can also update counters here
+            d3.select("#song_counter").text(dataToUse.length);
+        });
+        initBoxPlots("#area_boxplot", globalData); 
 
     });
 }
@@ -62,6 +73,9 @@ function populateDropdowns() {
             ySelect.property("value"), 
             groupSelect.property("value")
         );
+        updateBoxPlots(globalData,
+                        xSelect.property("value"),
+                        ySelect.property("value"));
     }
 
     // 5. Attach Listeners

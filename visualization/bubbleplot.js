@@ -1,11 +1,11 @@
-import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
-
 const margin = { top: 20, right: 30, bottom: 40, left: 50 };
 const LEGEND_SPACE = 220; // Increased space for the dual legend
 
 let svg, xScale, yScale, xAxis, yAxis, legendGroup;
 let circles;
 let totalWidth, totalHeight; 
+let onBubbleClickCallback = null; // Store the callback function
+let selectedBubbleId = null;      // Track which bubble is selected
 
 // Tooltip
 const tooltip = d3.select("body").append("div")
@@ -21,7 +21,8 @@ const tooltip = d3.select("body").append("div")
     .style("pointer-events", "none")
     .style("opacity", 0);
 
-export function initBubblePlot(containerId, data) {
+export function initBubblePlot(containerId, data, onClick) {
+    onBubbleClickCallback = onClick;
     d3.select(containerId).selectAll("*").remove();
 
     const container = d3.select(containerId);
@@ -53,6 +54,7 @@ export function initBubblePlot(containerId, data) {
     updateBubblePlot(data, "valence", "energy", "none");
 }
 
+// 2. UPDATE AGGREGATION TO STORE RAW DATA
 function getAggregatedData(data, groupBy, xAttr, yAttr) {
     const binFn = (d) => {
         const val = d[groupBy];
@@ -69,18 +71,12 @@ function getAggregatedData(data, groupBy, xAttr, yAttr) {
             count: values.length,       
             x: d3.mean(values, d => d[xAttr]), 
             y: d3.mean(values, d => d[yAttr]), 
-            groupAttr: groupBy          
+            groupAttr: groupBy,
+            data: values // <--- Store the raw array of songs here
         };
     });
 }
 
-/**
- * Draws the "MoVis" style dual legend
- * @param {Function} rScale - The radius scale
- * @param {Function} colorScale - The color scale
- * @param {Array} plotData - The actual data to calculate ranges
- * @param {Boolean} isNumeric - Whether the group ID is numeric (affects color legend)
- */
 function drawLegend(rScale, colorScale, plotData, isNumeric) {
     legendGroup.selectAll("*").remove();
     
@@ -122,20 +118,20 @@ function drawLegend(rScale, colorScale, plotData, isNumeric) {
             .attr("y", currentY - 2) // Just below circle
             .attr("text-anchor", "middle")
             .text(val)
-            .style("font-size", "10px")
+            .style("font-size", "40%")
             .style("fill", "#000");
     });
 
 
-    // --- 2. COLOR LEGEND (Right Column) ---
-    const colX = 80; // Start X position for color column
+    // --- 2. COLOR LEGEND ---
+    const colX = 85; // Start X position for color column
     
     // Title
     legendGroup.append("text")
         .attr("x", colX)
         .attr("y", 0)
         .text("Grouping range") 
-        .style("font-size", "12px")
+        .style("font-size", "70%")
         .style("font-weight", "bold")
         .style("fill", "#000");
 
@@ -208,21 +204,23 @@ export function updateBubblePlot(data, xAttr, yAttr, groupBy) {
     const effectiveWidth = totalWidth - margin.left - currentRightMargin;
     xScale.range([0, effectiveWidth]);
     xAxis.transition(t).call(d3.axisBottom(xScale));
-
+    selectedBubbleId = null
     // Handle Legend Visibility
     if (isGrouped) {
         legendGroup
             .attr("transform", `translate(${effectiveWidth + 60}, 40)`)
             .transition(t)
             .style("opacity", 1);
+        d3.select("#song_counter").text(data.length);
     } else {
         legendGroup.transition(t).style("opacity", 0);
+        d3.select("#song_counter").text(data.length);
     }
 
     // 2. Prepare Data
     let plotData = isGrouped ? getAggregatedData(data, groupBy, xAttr, yAttr) : data;
 
-    // 3. COLOR SCALES (MoVis Style - White to Green)
+    // 3. COLOR SCALES
     let colorScale;
     let isNumeric = false;
 
@@ -233,13 +231,12 @@ export function updateBubblePlot(data, xAttr, yAttr, groupBy) {
         isNumeric = !isNaN(parseFloat(sampleId));
 
         if (isNumeric) {
-            // Numeric: White -> Dark Green gradient
+            // Numeric: Light Blue -> Dark Blue gradient
             const domain = d3.extent(plotData, d => +d.id);
-            // We use range() and domain() with d3.scaleLinear to force specific colors
-            // or use interpolateGreens. Let's use custom range to match image exactly.
+            
             colorScale = d3.scaleLinear()
                 .domain(domain) // [min, max]
-                .range(["#f7fcf5", "#00441b"]); // White-ish green to Deep Green
+                .range(["#eff3ff", "#084594"]); 
         } else {
             // Categorical: Standard palette
             const categories = plotData.map(d => d.id).sort();
@@ -277,13 +274,43 @@ export function updateBubblePlot(data, xAttr, yAttr, groupBy) {
         .style("fill", d => isGrouped ? (isNumeric ? colorScale(+d.id) : colorScale(d.id)) : "#4682b4")
         .style("opacity", 0.9)
         .style("stroke", "#333")
-        .style("stroke-width", isGrouped ? 1 : 0.5);
+        .style("stroke-width", isGrouped ? 1 : 0.5)
+        .style("cursor", "pointer");
 
     circles.merge(enter).transition(t)
         .attr("cx", d => xScale(isGrouped ? d.x : d[xAttr]))
         .attr("cy", d => yScale(isGrouped ? d.y : d[yAttr]))
         .attr("r", d => isGrouped ? rScale(d.count) : 3) 
-        .style("fill", d => isGrouped ? (isNumeric ? colorScale(+d.id) : colorScale(d.id)) : "#4682b4");
+        .style("fill", d => isGrouped ? (isNumeric ? colorScale(+d.id) : colorScale(d.id)) : "#4682b4")
+        .style("opacity",0.8)
+        .style("stroke","#333");
+
+    // NEW CLICK HANDLER
+    circles.merge(enter).on("click", function(event, d) {
+        if (!isGrouped) return; // Only works for groups
+
+        // Check if this bubble is already selected
+        const isSelected = (selectedBubbleId === d.id);
+
+        if (isSelected) {
+            // DESELECT: Reset everything
+            selectedBubbleId = null;
+            d3.selectAll(".bubble").transition().style("opacity", 0.8).style("stroke", "#333");
+            
+            // Notify main.js to show ALL data
+            if (onBubbleClickCallback) onBubbleClickCallback(null); 
+        } else {
+            // SELECT: Highlight this one, dim others
+            selectedBubbleId = d.id;
+            
+            d3.selectAll(".bubble").transition().style("opacity", 0.2); // Dim all
+            d3.select(this).transition().style("opacity", 1).style("stroke", "black").style("stroke-width", 3); // Highlight clicked
+
+            // Notify main.js to show SUBSET data
+            // We pass 'd.data' which is the array of songs in this bubble
+            if (onBubbleClickCallback) onBubbleClickCallback(d.data);
+        }
+    });
 
     circles.exit().transition(t).attr("r", 0).remove();
 
