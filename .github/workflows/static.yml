@@ -37,7 +37,9 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload entire repository
-          path: visualization,dataset
+          path: |
+              visualization/
+              dataset/
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
