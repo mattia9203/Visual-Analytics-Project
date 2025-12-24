@@ -38,8 +38,8 @@ jobs:
         with:
           # Upload entire repository
           path: |
-            visualization
-            dataset
+            'visualization'
+            'dataset'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
