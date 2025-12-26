@@ -1,19 +1,23 @@
-// pcp.js
+
 const margin = { top: 30, right: 10, bottom: 10, left: 0 };
 
-let svg, x, y, dimensions, path, foreground, background, centroidPath;
+let svg, x, y, foreground, background, centroidPath;
 let width, height;
+let onBrushCallback = null;
+let activeBrushes = new Map(); // Stores active selections
 
-// The features we want to visualize in Parallel Coordinates
+// The features to visualize
 const features = [
     "danceability", "energy", "loudness", "speechiness", 
     "acousticness", "instrumentalness", "liveness", "valence"
 ];
 
-export function initPCP(containerId, data) {
+export function initPCP(containerId, data, onBrush) {
+    onBrushCallback = onBrush;
+    
     // 1. Clear previous drawings
     d3.select(containerId).selectAll("*").remove();
-
+    
     const container = d3.select(containerId);
     const rect = container.node().getBoundingClientRect();
     width = rect.width - margin.left - margin.right;
@@ -26,8 +30,7 @@ export function initPCP(containerId, data) {
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // 2. Build Scales for each dimension
-    // We compute the domain (min, max) for each audio feature separately
+    // 2. Build Scales
     y = {};
     features.forEach(name => {
         y[name] = d3.scaleLinear()
@@ -35,13 +38,12 @@ export function initPCP(containerId, data) {
             .range([height, 0]);
     });
 
-    // Build the X scale to position the axes horizontally
     x = d3.scalePoint()
         .range([0, width])
         .padding(1)
         .domain(features);
 
-    // 3. Draw Background Lines (Grey - Context)
+    // 3. Draw Background Lines (Grey Context)
     background = svg.append("g")
         .attr("class", "background")
         .selectAll("path")
@@ -52,7 +54,7 @@ export function initPCP(containerId, data) {
         .style("stroke", "#ddd")
         .style("opacity", 0.5);
 
-    // 4. Draw Foreground Lines (Blue - Active Selection)
+    // 4. Draw Foreground Lines (Blue Active)
     foreground = svg.append("g")
         .attr("class", "foreground")
         .selectAll("path")
@@ -61,16 +63,16 @@ export function initPCP(containerId, data) {
         .attr("d", pathFunction)
         .style("fill", "none")
         .style("stroke", "#4682b4") // Steelblue
-        .style("opacity", 0.05); // Start very faint to avoid clutter
+        .style("opacity", 0.6); // Visible by default
 
-    // 5. Draw the Axes
+    // 5. Draw Axes
     const axisGroup = svg.selectAll(".dimension")
         .data(features)
         .enter().append("g")
         .attr("class", "dimension")
         .attr("transform", d => `translate(${x(d)})`);
 
-    // Add axis lines and labels
+    // Add Axis Lines and Labels
     axisGroup.append("g")
         .each(function(d) { d3.select(this).call(d3.axisLeft(y[d])); })
         .append("text")
@@ -81,8 +83,21 @@ export function initPCP(containerId, data) {
         .style("font-size", "10px")
         .style("font-weight", "bold")
         .style("cursor", "move");
+
+    // 6. ADD BRUSHES (The Filtering Feature)
+    const brushWidth = 20;
     
-    // Placeholder for the Centroid Line
+    axisGroup.append("g")
+        .attr("class", "brush")
+        .each(function(d) {
+            d3.select(this).call(
+                d3.brushY()
+                    .extent([[-brushWidth / 2, 0], [brushWidth / 2, height]])
+                    .on("start brush end", (event) => brushed(event, d, data))
+            );
+        });
+
+    // Placeholder for the Centroid Line (Red Average Line)
     centroidPath = svg.append("path")
         .attr("class", "centroid")
         .style("fill", "none")
@@ -92,39 +107,77 @@ export function initPCP(containerId, data) {
         .style("stroke-dasharray", "5,5"); 
 }
 
-// Helper: The function that takes a data row and returns the SVG path
+// Helper: Line generator
 function pathFunction(d) {
     return d3.line()(features.map(p => [x(p), y[p](d[p])]));
 }
 
-// --- TRIGGERED ANALYTICS UPDATE ---
-export function updatePCP(selectedData) {
+// --- BRUSHING LOGIC ---
+function brushed(event, feature, data) {
+    // 1. Update active brushes map
+    if (event.selection) {
+        activeBrushes.set(feature, event.selection);
+    } else {
+        activeBrushes.delete(feature);
+    }
+
+    // 2. Filter Data
+    // A song is selected if it falls inside the brush for EVERY active feature
+    // Iterate over all lines to find matches
+    const matches = [];
     
-    // Case 1: No selection (or selection cleared)
+    foreground.style("display", function(d) {
+        const isMatch = Array.from(activeBrushes.entries()).every(([key, range]) => {
+            const val = y[key](d[key]); 
+            // Invert y-axis logic for brush check? No, d3 brush gives pixel coordinates.
+            // y scale converts value to pixels.
+            return val >= range[0] && val <= range[1];
+        });
+        
+        if (isMatch) matches.push(d);
+        return isMatch ? null : "none";
+    });
+
+    // 3. Send Filtered Data back to main.js (to update t-SNE)
+    if (onBrushCallback) {
+        if (activeBrushes.size === 0) {
+             onBrushCallback(null); // Reset if no brushes
+        } else {
+             onBrushCallback(matches);
+        }
+    }
+}
+
+// --- UPDATE FROM EXTERNAL (t-SNE Trigger) ---
+export function updatePCP(selectedData) {
+    // If t-SNE selects points, we clear local brushes to avoid conflict
+    if (activeBrushes.size > 0) {
+        // Optional: clear brushes here if you want t-SNE to override
+        // d3.selectAll(".brush").call(d3.brushY().move, null);
+        // activeBrushes.clear();
+    }
+
     if (!selectedData || selectedData.length === 0) {
-        // Reset view: show all lines faintly
-        foreground.style("opacity", 0.05).style("stroke", "#4682b4");
-        centroidPath.style("opacity", 0); // Hide centroid
+        // Reset view
+        foreground.style("display", null).style("stroke", "#4682b4").style("opacity", 0.1);
+        centroidPath.style("opacity", 0);
         return;
     }
 
-    // Case 2: Selection Active
-    
-    // A. Filter visual lines
-    // We use a Set for O(1) lookup speed
-    const selectedIds = new Set(selectedData.map(d => d.track_id)); // Ensure your CSV has 'track_id'
+    // Filter lines based on t-SNE selection
+    // Using track_name (since you said you switched to it)
+    const selectedNames = new Set(selectedData.map(d => d.track_name)); 
 
-    foreground.style("opacity", d => selectedIds.has(d.track_id) ? 0.8 : 0.02)
-              .style("stroke", d => selectedIds.has(d.track_id) ? "#4682b4" : "#ddd");
+    foreground.style("display", d => selectedNames.has(d.track_name) ? null : "none")
+              .style("opacity", 0.6)
+              .style("stroke", "#4682b4");
 
-    // B. COMPUTE ANALYTICS (The Centroid)
-    // This calculates the average of every feature for the selected group
+    // Compute Centroid (Average Line)
     const centroid = {};
     features.forEach(attr => {
         centroid[attr] = d3.mean(selectedData, d => +d[attr]);
     });
 
-    // C. Draw the Analytic Result
     centroidPath
         .datum(centroid)
         .attr("d", pathFunction)
