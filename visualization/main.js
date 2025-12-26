@@ -1,6 +1,6 @@
 import { initBubblePlot, updateBubblePlot } from "./bubbleplot.js";
 import { initBoxPlots, updateBoxPlots } from "./boxplot.js";
-import { initTSNE } from "./tSNE.js"; 
+import { initTSNE, highlightTSNE} from "./tSNE.js"; 
 import { initPCP, updatePCP } from "./parallel_coordinates.js";
 
 const DATA_PATH = "../dataset/final_dataset.csv"; 
@@ -47,8 +47,25 @@ function loadData() {
         // 2. Box Plots
         initBoxPlots("#area_boxplot", globalData); 
 
-        // 3. Parallel Coordinates (Initialize with all data)
-        initPCP("#area_pcp", globalData); 
+        // 3. Parallel Coordinates (Updated Init)
+        // Now we pass a callback function as the 3rd argument
+        initPCP("#area_pcp", globalData, (pcpFilteredData) => {
+            console.log("PCP Filtered:", pcpFilteredData ? pcpFilteredData.length : "All");
+            
+            // 1. Filter t-SNE
+            highlightTSNE(pcpFilteredData);
+
+            // 2. Update Counter
+            const count = pcpFilteredData ? pcpFilteredData.length : globalData.length;
+            d3.select("#song_counter").text(count);
+
+            // 3. Update Boxplots
+            const dataToUse = pcpFilteredData || globalData;
+            updateBoxPlots(dataToUse, 
+                d3.select("#x-axis-select").property("value"), 
+                d3.select("#y-axis-select").property("value")
+            );
+        }); 
 
         // 3. t-SNE (New!)
         initTSNE("#area_tsne", globalData, (brushedData) => {
