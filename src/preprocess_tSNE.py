@@ -35,7 +35,7 @@ print("Running t-SNE... (this will take longer now, be patient)")
 
 tsne = TSNE(
     n_components=2, 
-    perplexity=40,       # <--- Increased from 30 to 40
+    perplexity=60,       # <--- Increased from 30 to 40
     n_iter=3000,         # <--- Increased from 1000 to 3000 (gives it time to separate)
     init='pca',          # <--- Use PCA initialization
     learning_rate='auto',

@@ -55,9 +55,9 @@ export function initTSNE(containerId, data, onBrush) {
         .attr("class", "tsne-dot")
         .attr("cx", d => xScale(+d.tsne_x))
         .attr("cy", d => yScale(+d.tsne_y))
-        .attr("r", 2)                 // <--- Change 3 to 2 (smaller dots)
+        .attr("r", 3)                 // <--- Change 3 to 2 (smaller dots)
         .style("fill", d => colorScale(d.track_genre || "Unknown"))
-        .style("opacity", 0.5)        // <--- Change 0.7 to 0.5 (more transparent)
+        .style("opacity", 0.7)        // <--- Change 0.7 to 0.5 (more transparent)
         .style("stroke", "none");     // <--- Ensure no outline
 
     // --- 3. TOOLTIPS ---

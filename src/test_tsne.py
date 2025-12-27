@@ -17,7 +17,7 @@ except FileNotFoundError:
 # 2. FILTER FOR 3 DISTINCT GENRES
 # We use 'country', 'dance', and 'hardcore' (90s Hip Hop in your data)
 # These represent Acoustic vs Electronic vs Speech-heavy music.
-selected_genres = ['country', 'dance', 'hardcore']
+selected_genres = ['country', 'grunge', 'hardcore']
 
 print(f"Filtering dataset for genres: {selected_genres}")
 df_subset = df[df['track_genre'].isin(selected_genres)].copy()
@@ -46,7 +46,7 @@ data_scaled = scaler.fit_transform(data_matrix)
 # Perplexity 30 is good for this subset size (~200-500 songs)
 tsne = TSNE(
     n_components=2, 
-    perplexity=30, 
+    perplexity=50, 
     n_iter=1000, 
     random_state=42, 
     init='pca', 
