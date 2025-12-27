@@ -3,66 +3,55 @@ from sklearn.manifold import TSNE
 from sklearn.preprocessing import MinMaxScaler
 import numpy as np
 
-# 1. LOAD YOUR DATASET
-# Make sure this matches your actual CSV filename
+# 1. LOAD DATA
 input_file = "../dataset/final_imputed_data_normalized.csv" 
+output_file = "../dataset/test_dataset.csv"
 
 print(f"Loading {input_file}...")
-try:
-    df = pd.read_csv(input_file)
-except FileNotFoundError:
-    print(f"❌ Error: File '{input_file}' not found. Please check the name.")
-    exit()
+df = pd.read_csv(input_file)
 
-# 2. FILTER FOR 3 DISTINCT GENRES
-# We use 'country', 'dance', and 'hardcore' (90s Hip Hop in your data)
-# These represent Acoustic vs Electronic vs Speech-heavy music.
-selected_genres = ['country', 'grunge', 'hardcore']
+# 2. SELECT 10 DISTINCT GENRES
+selected_genres = [
+    'pop', 'rock', 'hip-hop', 'dance', 'rock-n-roll', 'alternative', 'indie-pop'
+]
 
-print(f"Filtering dataset for genres: {selected_genres}")
+print(f"Filtering for 10 genres: {selected_genres}")
 df_subset = df[df['track_genre'].isin(selected_genres)].copy()
 
-# Check if we actually found data
-if len(df_subset) == 0:
-    print("⚠️ Error: No songs found! Check if 'track_genre' column exists or genre names match.")
-    print("Available genres in your file:", df['track_genre'].unique()[:10])
+if len(df_subset) < 50:
+    print("Error: Not enough data found. Check genre names.")
     exit()
 
-print(f"✅ Found {len(df_subset)} songs. Preparing t-SNE...")
-
-# 3. SELECT AUDIO FEATURES
+# 3. FEATURES & NORMALIZATION
 features = [
     "danceability", "energy", "loudness", "speechiness", 
     "acousticness", "instrumentalness", "liveness", "valence"
 ]
 
-# 4. NORMALIZE DATA
-# We use MinMaxScaler to keep everything between 0 and 1
 data_matrix = df_subset[features].fillna(0)
 scaler = MinMaxScaler()
 data_scaled = scaler.fit_transform(data_matrix)
 
-# 5. RUN t-SNE
-# Perplexity 30 is good for this subset size (~200-500 songs)
+# 4. RUN AGGRESSIVE t-SNE
+print("Running Aggressive t-SNE (Cosine Metric)...")
+
 tsne = TSNE(
     n_components=2, 
-    perplexity=50, 
-    n_iter=1000, 
+    perplexity=30,          # Standard balance
+    early_exaggeration=50,  # <--- CRITICAL: Forces clusters to separate visually
+    metric='cosine',        # <--- CRITICAL: Often better for audio features
+    n_iter=2000,            # Give it more time to settle
     random_state=42, 
     init='pca', 
     learning_rate='auto',
     verbose=1
 )
 
-print("Running t-SNE algorithm...")
 results = tsne.fit_transform(data_scaled)
 
-# 6. SAVE RESULTS
+# 5. SAVE
 df_subset['tsne_x'] = results[:, 0]
 df_subset['tsne_y'] = results[:, 1]
 
-output_file = "../dataset/test_dataset.csv"
 df_subset.to_csv(output_file, index=False)
-
-print(f"✅ Success! Created '{output_file}'.")
-print("Now update your main.js to load this file: const DATA_PATH = '../dataset/test_dataset.csv';")
+print(f"✅ Done! Saved 'aggressive' map to: {output_file}")
