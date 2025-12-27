@@ -3,7 +3,7 @@ import { initBoxPlots, updateBoxPlots } from "./boxplot.js";
 import { initTSNE, highlightTSNE} from "./tSNE.js"; 
 import { initPCP, updatePCP } from "./parallel_coordinates.js";
 
-const DATA_PATH = "../dataset/final_dataset.csv"; 
+const DATA_PATH = "../dataset/final_dataset_kmeans.csv"; 
 const AUDIO_FEATURES = ["danceability", "energy", "loudness", "speechiness", "acousticness", "instrumentalness", "liveness", "valence", "popularity", "Real_Year", "tsne_x", "tsne_y"]; // <--- ADD TSNE COLUMNS HERE
 
 export let globalData = [];

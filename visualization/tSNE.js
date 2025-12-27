@@ -45,9 +45,12 @@ export function initTSNE(containerId, data, onBrush) {
         .domain(d3.extent(data, d => +d.tsne_y)).nice()
         .range([height, 0]);
 
-    const genres = Array.from(new Set(data.map(d => d.track_genre || "Unknown"))).sort();
-    colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(genres);
+    //const genres = Array.from(new Set(data.map(d => d.track_genre || "Unknown"))).sort();
+    //colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(genres);
 
+    // NEW (K-Means Colors):
+    // The clusters are numbers 0-7, so we just need a color scheme for numbers.
+    colorScale = d3.scaleOrdinal(d3.schemeSet2); // or schemeCategory10
     // --- 2. DRAW CIRCLES ---
     circles = svg.selectAll(".tsne-dot")
         .data(data)
@@ -56,7 +59,7 @@ export function initTSNE(containerId, data, onBrush) {
         .attr("cx", d => xScale(+d.tsne_x))
         .attr("cy", d => yScale(+d.tsne_y))
         .attr("r", 3)                 // <--- Change 3 to 2 (smaller dots)
-        .style("fill", d => colorScale(d.track_genre || "Unknown"))
+        .style("fill", d => colorScale(d.cluster_label))
         .style("opacity", 0.7)        // <--- Change 0.7 to 0.5 (more transparent)
         .style("stroke", "none");     // <--- Ensure no outline
 
@@ -128,7 +131,8 @@ export function highlightTSNE(subsetData) {
         circles
             .transition().duration(200)
             .style("opacity", 0.6)
-            .style("fill", d => colorScale(d.track_genre || "Unknown"))
+            .style("fill", d => colorScale(d.cluster_label))
+            //.style("fill", d => colorScale(d.track_genre || "Unknown"))
             .attr("r", 3)
             .style("stroke", "none");
         return;
@@ -152,7 +156,8 @@ export function highlightTSNE(subsetData) {
         .raise() // Pull to front layer
         .transition().duration(200)
         .style("opacity", 1)
-        .style("fill", d => colorScale(d.track_genre || "Unknown")) 
+        .style("fill", d => colorScale(d.cluster_label))
+        //.style("fill", d => colorScale(d.track_genre || "Unknown")) 
         .attr("r", 8)                 // HUGE radius (easy to see)
         .style("stroke", "black")
         .style("stroke-width", 2);
