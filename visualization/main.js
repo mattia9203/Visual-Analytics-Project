@@ -1,5 +1,5 @@
-import { initBubblePlot, updateBubblePlot } from "./bubbleplot.js";
-import { initBoxPlots, updateBoxPlots } from "./boxplot.js";
+import { initBubblePlot, updateBubblePlot, highlightBubblePlot } from "./bubbleplot.js";
+import { initBoxPlots, updateBoxPlots} from "./boxplot.js";
 import { initTSNE, highlightTSNE} from "./tSNE.js"; 
 import { initPCP, updatePCP } from "./parallel_coordinates.js";
 
@@ -55,6 +55,9 @@ function loadData() {
             // 1. Filter t-SNE
             highlightTSNE(pcpFilteredData);
 
+            // B. Filter Bubble Plot (NEW!)
+            highlightBubblePlot(pcpFilteredData);
+
             // 2. Update Counter
             const count = pcpFilteredData ? pcpFilteredData.length : globalData.length;
             d3.select("#song_counter").text(count);
@@ -75,6 +78,9 @@ function loadData() {
             // If brushedData exists, we will update the other charts to show ONLY these songs
             const dataToUse = brushedData || globalData;
             
+            // B. Filter Bubble Plot (NEW!)
+            highlightBubblePlot(brushedData);
+
             // Update counter
             d3.select("#song_counter").text(dataToUse.length);
 

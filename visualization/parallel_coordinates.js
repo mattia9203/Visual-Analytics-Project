@@ -34,7 +34,7 @@ export function initPCP(containerId, data, onBrush) {
     y = {};
     features.forEach(name => {
         y[name] = d3.scaleLinear()
-            .domain(d3.extent(data, d => +d[name]))
+            .domain([0, 100]) // <--- CHANGE: Force all axes to 0-100
             .range([height, 0]);
     });
 

@@ -20,7 +20,7 @@ export function initTSNE(containerId, data, onBrush) {
     onBrushCallback = onBrush;
     
     const container = d3.select(containerId);
-    container.select("svg").remove();
+    d3.select(containerId).selectAll("*").remove();
 
     const rect = container.node().getBoundingClientRect();
     totalWidth = rect.width;
@@ -58,9 +58,9 @@ export function initTSNE(containerId, data, onBrush) {
         .attr("class", "tsne-dot")
         .attr("cx", d => xScale(+d.tsne_x))
         .attr("cy", d => yScale(+d.tsne_y))
-        .attr("r", 3)                 // <--- Change 3 to 2 (smaller dots)
+        .attr("r", 3)                 
         .style("fill", d => colorScale(d.cluster_label))
-        .style("opacity", 0.7)        // <--- Change 0.7 to 0.5 (more transparent)
+        .style("opacity", 0.7)        
         .style("stroke", "none");     // <--- Ensure no outline
 
     // --- 3. TOOLTIPS ---
@@ -120,6 +120,67 @@ export function initTSNE(containerId, data, onBrush) {
 
         if (onBrushCallback) onBrushCallback(selectedData);
     }
+
+    // 1. DEFINE YOUR CLUSTER NAMES HERE
+    // Replace these strings with the real descriptions based on your Python analysis.
+    const clusterNames = {
+        0: "Classic Rock & Roll", 
+        1: "Hard Rock & Metal",
+        2: "Urban & Rhythmic",
+        3: "Moody Alternative",
+        4: "Energetic Pop/Rock",
+        5: "Happy Dance Pop",
+        6: "Funky Rock & Blues", 
+        7: "Retro Dance & Rock"  
+    };
+
+    // --- 5. COMPACT LEGEND (BOTTOM-RIGHT, INSIDE) ---
+
+    // A. Configuration for "Small Form"
+    const legendItemSize = 9;   // Size of the color box (smaller)
+    const legendSpacing = 11;    // Space between rows (tighter)
+    const legendWidth = 120;     // Approximate width of the legend box
+    // Calculate total height based on number of items
+    const legendHeight = colorScale.domain().length * legendSpacing - 10; 
+
+    // B. Create Container positioned at Bottom-Right
+    // We subtract the legend dimensions from the total width/height to pin it to the corner
+    const legendContainer = svg.append("g")
+        .attr("class", "legend")
+        .attr("transform", `translate(${width - legendWidth}, ${height - legendHeight})`);
+
+    // C. Add Semi-Transparent Background (Optional, but recommended for readability)
+    legendContainer.append("rect")
+        .attr("width", legendWidth)
+        .attr("height", legendHeight)
+        .attr("fill", "white")
+        .attr("opacity", 0.8)       // See-through background
+        .attr("rx", 5);             // Rounded corners
+
+    const legendData = colorScale.domain().sort(d3.ascending);
+
+    // D. Draw Legend Items
+    const legendRows = legendContainer.selectAll(".legend-row")
+        .data(legendData)
+        .enter().append("g")
+        .attr("class", "legend-row")
+        .attr("transform", (d, i) => `translate(5, ${i * legendSpacing + 5})`); // Minimal padding
+
+    // Draw Color Rect (Small)
+    legendRows.append("rect")
+        .attr("width", legendItemSize)
+        .attr("height", legendItemSize)
+        .attr("fill", d => colorScale(d));
+
+    // Draw Text Label (Small Font)
+    legendRows.append("text")
+        .attr("x", legendItemSize + 5) // Just a little gap after the rect
+        .attr("y", legendItemSize - 1)
+        .style("font-size", "10px")     // Small font size
+        .style("fill", "#333")
+        .style("font-family", "sans-serif")
+        // Use your name dictionary from before
+        .text(d => `${d}: ${clusterNames[d] || "Unknown"}`);
 }
 
 // --- UPDATED HIGHLIGHT FUNCTION (High Contrast Mode) ---

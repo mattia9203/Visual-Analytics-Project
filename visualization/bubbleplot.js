@@ -350,3 +350,52 @@ export function updateBubblePlot(data, xAttr, yAttr, groupBy) {
             tooltip.transition().duration(200).style("opacity", 0);
         });
 }
+// bubbleplot.js
+
+export function highlightBubblePlot(subsetData) {
+    const circles = d3.selectAll(".bubble");
+
+    // 1. INTERRUPT: Stop any ongoing animations immediately to prevent lag
+    circles.interrupt();
+
+    // 2. CHECK: Is this a "Reset" (no selection)?
+    if (!subsetData || subsetData.length === 0) {
+        circles.transition().duration(200)
+            .style("opacity", 0.8)        // Restore default opacity
+            .style("stroke", "#333")      // Restore default grey border
+            .style("stroke-width", 1);    // <--- FIX: Restore thin border
+        return;
+    }
+
+    // 3. PREPARE LOOKUP
+    const selectedNames = new Set(subsetData.map(d => d.track_name));
+
+    // 4. APPLY STYLES (One pass for performance)
+    circles.each(function(d) {
+        // Determine if this bubble matches
+        let isMatch = false;
+        if (d.data) {
+            // Grouped Bubble: Check if ANY song inside is selected
+            isMatch = d.data.some(song => selectedNames.has(song.track_name));
+        } else {
+            // Single Bubble: Check name
+            isMatch = selectedNames.has(d.track_name);
+        }
+
+        const el = d3.select(this);
+
+        if (isMatch) {
+            // --- STATE: HIGHLIGHTED ---
+            el.transition().duration(200)
+                .style("opacity", 1)           // Fully visible
+                .style("stroke", "black")      // Black border
+                .style("stroke-width", 3);     // Thick border
+        } else {
+            // --- STATE: DIMMED (The fix for "Gray Side") ---
+            el.transition().duration(200)
+                .style("opacity", 0.1)         // Faded
+                .style("stroke", "none")       // REMOVE stroke completely
+                .style("stroke-width", 0);     // <--- FIX: Ensure width is 0
+        }
+    });
+}
