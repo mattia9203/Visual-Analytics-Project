@@ -249,6 +249,7 @@ export function updateBubblePlot(data, xAttr, yAttr, groupBy) {
     const yExtent = d3.extent(plotData, d => isGrouped ? d.y : d[yAttr]);
     xScale.domain(xExtent).nice();
     yScale.domain(yExtent).nice();
+    xAxis.transition(t).call(d3.axisBottom(xScale));
     yAxis.transition(t).call(d3.axisLeft(yScale));
 
     // 5. RADIUS SCALE

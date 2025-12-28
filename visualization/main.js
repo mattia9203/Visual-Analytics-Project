@@ -2,8 +2,10 @@ import { initBubblePlot, updateBubblePlot, highlightBubblePlot } from "./bubblep
 import { initBoxPlots, updateBoxPlots} from "./boxplot.js";
 import { initTSNE, highlightTSNE} from "./tSNE.js"; 
 import { initPCP, updatePCP } from "./parallel_coordinates.js";
+import { initRankingPlot } from "./rankingplot.js";
 
 const DATA_PATH = "../dataset/final_dataset_kmeans.csv"; 
+const RANKING_DATA_PATH = "../dataset/merged_common_songs.csv";
 const AUDIO_FEATURES = ["danceability", "energy", "loudness", "speechiness", "acousticness", "instrumentalness", "liveness", "valence", "popularity", "Real_Year", "tsne_x", "tsne_y"]; // <--- ADD TSNE COLUMNS HERE
 
 export let globalData = [];
@@ -13,7 +15,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function loadData() {
-    d3.csv(DATA_PATH).then(data => {
+    // Load BOTH datasets using Promise.all
+    Promise.all([
+        d3.csv(DATA_PATH),
+        d3.csv(RANKING_DATA_PATH)
+        ]).then(([data, rankingData]) => {
         globalData = data.map(d => {
             let obj = { ...d };
             AUDIO_FEATURES.forEach(ft => {
@@ -95,7 +101,7 @@ function loadData() {
             // This satisfies the "Triggered Analytics" requirement
             updatePCP(brushedData);
         });
-
+        initRankingPlot("#area_bump", rankingData);
     });
 }
 
