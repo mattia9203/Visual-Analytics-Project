@@ -22,6 +22,10 @@ function loadData() {
         ]).then(([data, rankingData]) => {
         globalData = data.map(d => {
             let obj = { ...d };
+            // 1. Ensure track_id exists
+            if (!obj.track_id) {
+                obj.track_id = `song_${index}`; // Generate unique ID if missing
+            }
             AUDIO_FEATURES.forEach(ft => {
                 if (ft !== "track_genre") obj[ft] = +d[ft] || 0;
                 else obj[ft] = d[ft];
