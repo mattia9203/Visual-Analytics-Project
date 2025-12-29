@@ -37,7 +37,7 @@ function loadData() {
         // --- INITIALIZE VISUALIZATIONS ---
 
         // 1. Bubble Plot
-        initBubblePlot("#area_bubble", globalData, (subsetData) => {
+        initBubblePlot("#sub_bubble_container", globalData, (subsetData) => {
             // Logic when Bubble is clicked (Filter t-SNE?)
             const dataToUse = subsetData || globalData;
 
@@ -51,7 +51,7 @@ function loadData() {
         });
 
         // 2. Box Plots
-        initBoxPlots("#area_boxplot", globalData); 
+        initBoxPlots("#sub_boxplot_container", globalData); 
 
         // 3. Parallel Coordinates (Updated Init)
         // Now we pass a callback function as the 3rd argument

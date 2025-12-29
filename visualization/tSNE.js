@@ -137,11 +137,11 @@ export function initTSNE(containerId, data, onBrush) {
     // --- 5. COMPACT LEGEND (BOTTOM-RIGHT, INSIDE) ---
 
     // A. Configuration for "Small Form"
-    const legendItemSize = 9;   // Size of the color box (smaller)
-    const legendSpacing = 11;    // Space between rows (tighter)
+    const legendItemSize = 15;   // Size of the color box (smaller)
+    const legendSpacing = 20;    // Space between rows (tighter)
     const legendWidth = 120;     // Approximate width of the legend box
     // Calculate total height based on number of items
-    const legendHeight = colorScale.domain().length * legendSpacing - 10; 
+    const legendHeight = colorScale.domain().length * legendSpacing + 10; 
 
     // B. Create Container positioned at Bottom-Right
     // We subtract the legend dimensions from the total width/height to pin it to the corner
