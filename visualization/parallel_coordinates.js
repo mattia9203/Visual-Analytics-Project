@@ -5,6 +5,7 @@ let svg, x, y, foreground, background, centroidPath;
 let width, height;
 let onBrushCallback = null;
 let activeBrushes = new Map(); // Stores active selections
+let resetBtn;
 
 // The features to visualize
 const features = [
@@ -22,6 +23,29 @@ export function initPCP(containerId, data, onBrush) {
     const rect = container.node().getBoundingClientRect();
     width = rect.width - margin.left - margin.right;
     height = rect.height - margin.top - margin.bottom;
+
+    // --- ADD RESET BUTTON ---
+    resetBtn = container.append("button")
+        .text("RESET")
+        .style("display", "none")       // Hidden by default
+        .style("position", "absolute")
+        .style("top", "5px")
+        .style("right", "10px")
+        .style("z-index", "10")
+        .style("width", "2vw")          
+        .style("height", "1.5vh")       
+        .style("font-size", "0.5vw")    
+        .style("padding", "0")
+        .style("line-height", "1.5vh")  // Center text vertically
+        .style("border", "1px solid #ccc")
+        .style("background", "white")
+        .style("border-radius", "4px")
+        .style("cursor", "pointer")
+        .style("color", "#333")
+        .style("font-weight", "bold")
+        .on("mouseover", function() { d3.select(this).style("background", "#f0f0f0").style("color", "red"); })
+        .on("mouseout", function() { d3.select(this).style("background", "white").style("color", "#333"); })
+        .on("click", resetSelection);   // Click handler
 
     svg = container.append("svg")
         .attr("width", "100%")
@@ -112,6 +136,26 @@ function pathFunction(d) {
     return d3.line()(features.map(p => [x(p), y[p](d[p])]));
 }
 
+function resetSelection() {
+    // 1. Clear Brushes Visuals
+    // We select all brush groups and invoke the move method with null
+    d3.selectAll(".brush").each(function() {
+        d3.select(this).call(d3.brushY().move, null);
+    });
+
+    // 2. Clear Internal State
+    activeBrushes.clear();
+
+    // 3. Hide the Button
+    resetBtn.style("display", "none");
+
+    // 4. Reset Line Visuals (Show all)
+    foreground.style("display", null);
+
+    // 5. Notify Main.js to reset other charts (pass null)
+    if (onBrushCallback) onBrushCallback(null);
+}
+
 // --- BRUSHING LOGIC ---
 function brushed(event, feature, data) {
     // 1. Update active brushes map
@@ -146,6 +190,11 @@ function brushed(event, feature, data) {
              onBrushCallback(matches);
         }
     }
+    if (activeBrushes.size > 0) {
+        resetBtn.style("display", "block");
+    } else {
+        resetBtn.style("display", "none");
+    }
 }
 
 // --- UPDATE FROM EXTERNAL (t-SNE Trigger) ---
@@ -155,6 +204,7 @@ export function updatePCP(selectedData) {
         // Optional: clear brushes here if you want t-SNE to override
         // d3.selectAll(".brush").call(d3.brushY().move, null);
         // activeBrushes.clear();
+        resetBtn.style("display", "none");
     }
 
     if (!selectedData || selectedData.length === 0) {
