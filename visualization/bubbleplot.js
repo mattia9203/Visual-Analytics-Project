@@ -369,7 +369,7 @@ export function highlightBubblePlot(subsetData) {
     }
 
     // 3. PREPARE LOOKUP
-    const selectedNames = new Set(subsetData.map(d => d.track_name));
+    const selectedNames = new Set(subsetData.map(d => d.track_id));
 
     // 4. APPLY STYLES (One pass for performance)
     circles.each(function(d) {
@@ -377,10 +377,10 @@ export function highlightBubblePlot(subsetData) {
         let isMatch = false;
         if (d.data) {
             // Grouped Bubble: Check if ANY song inside is selected
-            isMatch = d.data.some(song => selectedNames.has(song.track_name));
+            isMatch = d.data.some(song => selectedNames.has(song.track_id));
         } else {
             // Single Bubble: Check name
-            isMatch = selectedNames.has(d.track_name);
+            isMatch = selectedNames.has(d.track_id);
         }
 
         const el = d3.select(this);

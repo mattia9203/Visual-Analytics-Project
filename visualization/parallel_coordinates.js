@@ -165,10 +165,9 @@ export function updatePCP(selectedData) {
     }
 
     // Filter lines based on t-SNE selection
-    // Using track_name (since you said you switched to it)
-    const selectedNames = new Set(selectedData.map(d => d.track_name)); 
+    const selectedNames = new Set(selectedData.map(d => d.track_id)); 
 
-    foreground.style("display", d => selectedNames.has(d.track_name) ? null : "none")
+    foreground.style("display", d => selectedNames.has(d.track_id) ? null : "none")
               .style("opacity", 0.6)
               .style("stroke", "#4682b4");
 

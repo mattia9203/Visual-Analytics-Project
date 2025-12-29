@@ -199,7 +199,7 @@ export function highlightTSNE(subsetData) {
         return;
     }
 
-    const selectedNames = new Set(subsetData.map(d => d.track_name));
+    const selectedNames = new Set(subsetData.map(d => d.track_id));
 
     // 1. DIM EVERYTHING TO NEAR INVISIBLE
     circles
@@ -210,7 +210,7 @@ export function highlightTSNE(subsetData) {
         .style("stroke", "none");
 
     // 2. FILTER MATCHES
-    const matches = circles.filter(d => selectedNames.has(d.track_name));
+    const matches = circles.filter(d => selectedNames.has(d.track_id));
 
     // 3. HIGHLIGHT WITH GIANT DOTS
     matches
