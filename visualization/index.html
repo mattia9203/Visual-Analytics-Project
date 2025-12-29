@@ -2,53 +2,68 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Music Evolution Dashboard</title>
+  <title>SpotyVis Dashboard</title>
   <link type="text/css" rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 
-<body id="body" class="light">
+<body id="body">
 
   <div id="all">
     
-    <div class="area" id="toolbar">
-      <div class="title-bar-content">
-        <span class="dashboard-title pointer" onClick="window.location.reload();">Music Evolution</span>
+    <div class="area card" id="area_tsne">
+        <div class="chart-header">
+            <span>Clustering (t-SNE)</span>
+        </div>
+        </div>
 
-        <label class="control-label" for="x-axis-select">Bubble X:</label>
-        <select id="x-axis-select"></select>
+    <div class="area card" id="area_combined">
         
-        <label class="control-label" for="y-axis-select">Bubble Y:</label>
-        <select id="y-axis-select"></select>
+        <div class="chart-header-complex">
+            <span class="chart-title pointer" onClick="window.location.reload();">SpotyVis</span>
+            
+            <div class="controls-row">
+                <div class="control-group">
+                    <label for="x-axis-select">X:</label>
+                    <select id="x-axis-select"></select>
+                </div>
 
-        <label class="control-label" for="group-by-select">Group By:</label>
-        <select id="group-by-select" style="margin-right: 20px;"></select>
-        
-        <span class="counter-wrapper">
-          <label>Songs: </label>
-          <b id="song_counter">0</b>
-        </span>
-      </div>
+                <div class="control-group">
+                    <label for="y-axis-select">Y:</label>
+                    <select id="y-axis-select"></select>
+                </div>
+
+                <div class="control-group">
+                    <label for="group-by-select">Group:</label>
+                    <select id="group-by-select"></select>
+                </div>
+                
+                <div class="counter-badge">
+                    <span>Songs:</span>
+                    <b id="song_counter">0</b>
+                </div>
+            </div>
+        </div>
+
+        <div class="combined-content">
+            <div id="sub_bubble_container"></div>
+            
+            <div id="sub_boxplot_container"></div>
+        </div>
+
     </div>
 
-    <div class="area" id="area_tsne">
-        <div class="chart-header"></div>
+    <div class="area card" id="area_pcp">
+        <div class="chart-header">
+            <span>Feature Filter (PCP)</span>
+        </div>
     </div>
 
-    <div class="area" id="area_bubble">
-        <div class="chart-header"></div>
-    </div>
-
-    <div class="area" id="area_boxplot">
-        <div class="chart-header"></div>
-    </div>
-
-    <div class="area" id="area_pcp">
-        <div class="chart-header"></div>
-    </div>
-
-    <div class="area" id="area_bump">
-        <div class="chart-header">Genre Trends (Top 10)</div>
+    <div class="area card" id="area_bump">
+        <div class="chart-header">
+            <span>Genre Trends</span>
+        </div>
     </div>
 
   </div>

@@ -1,215 +1,145 @@
 /* --- GLOBAL RESET --- */
-* {
-    box-sizing: border-box; /* Ensures borders don't break percentage widths */
-}
+* { box-sizing: border-box; }
 
 body {
-  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', sans-serif;
   margin: 0;
   overflow: hidden; 
-  background-color: white;
-  color: #333;
+  background-color: #f3f4f6; /* Modern Light Grey */
+  color: #1f2937;
   width: 100vw;
   height: 100vh;
 }
 
 .pointer { cursor: pointer; }
 
-/* --- MAIN WRAPPER --- */
+/* --- MAIN LAYOUT (CSS Grid) --- */
 #all {
-    width: 99vw;
-    height: 99vh;
-    position: absolute;
-    top: 0.5vh;
-    left: 0.5vw;
+    width: 100%;
+    height: 100%;
+    padding: 12px;
+    display: grid;
+    /* TWO COLUMNS: Left (35%) and Right (65%) */
+    grid-template-columns: 45% 55%;
+    /* TWO ROWS: Top (55%) and Bottom (45%) */
+    grid-template-rows: 55% 45%; 
+    gap: 12px;
 }
 
-/* --- COMMON AREA STYLES --- */
-.area {
-  position: absolute;
+/* --- CARD STYLE --- */
+.card {
   background-color: white;
-  border: 1px solid #333;
-  border-radius: 0.5vh; /* Responsive radius */
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 
+              0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
 }
 
-/* --- TOOLBAR STYLING --- */
-#toolbar {
-    width: 100%;
-    height: 5vh; /* Relative height */
-    top: 0;
-    left: 0;
-    background: #e9ecef;
+/* --- HEADER & CONTROLS --- */
+.chart-header, .chart-header-complex {
+    padding: 0 16px;
+    height: 50px; /* Fixed height for header */
+    border-bottom: 1px solid #f3f4f6;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid #333;
+    background: #fff;
+    flex-shrink: 0; /* Prevent header from squishing */
 }
 
-.title-bar-content {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    padding-left: 1vw;
+.chart-header-complex {
+    justify-content: space-between;
 }
 
-.dashboard-title {
+.chart-title {
     font-weight: 700;
-    font-size: 2.2vh; /* Font scales with height */
-    color: #2c3e50;
-    margin-right: 2vw;
-    white-space: nowrap;
+    font-size: 16px;
+    color: #111827;
 }
 
-.control-label {
-    font-size: 1.6vh;
-    margin-right: 0.5vw;
-    font-weight: 500;
-    white-space: nowrap;
+.controls-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #6b7280;
 }
 
 select {
-    font-size: 1.4vh;
-    padding: 0.2vh 0.4vw;
-    margin-right: 2vw;
-    border: 1px solid #aaa;
-    border-radius: 0.3vh;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    padding: 4px 8px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background-color: #f9fafb;
+    outline: none;
+    cursor: pointer;
 }
 
-.counter-wrapper {
-    margin-left: auto; /* Pushes to far right */
-    margin-right: 1vw;
-    font-size: 1.6vh;
-    display: flex;
-    align-items: center;
-    gap: 0.5vw;
+.counter-badge {
+    background-color: #eff6ff;
+    color: #1e40af;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid #dbeafe;
 }
 
-/* --- CHART CONTAINERS (GRID LAYOUT) --- */
-
-/* Row 1 Top Positions */
-#area_tsne {
-    width: 38%;
-    height: 46vh;
-    top: 6vh; /* Below the 5vh toolbar + gap */
-    left: 0;
+/* --- COMBINED CONTENT (The Split View) --- */
+.combined-content {
+    flex-grow: 1; /* Fill remaining card space */
+    display: flex; /* Side-by-side layout */
+    width: 100%;
+    height: 100%;
+    position: relative;
 }
 
-#area_bubble {
-    width: 41%;
-    height: 46vh;
-    top: 6vh;
-    left: 38%; /* 38% width + 1% gap */
+#sub_bubble_container {
+    width: 65%; /* Bubble Plot Width */
+    height: 100%;
+    border-right: 1px solid #f3f4f6; /* Divider */
+    position: relative;
 }
 
-#area_boxplot {
-    width: 21%;
-    height: 46vh;
-    top: 6vh;
-    left: 79%; /* 39% + 41% + gaps */
+#sub_boxplot_container {
+    width: 35%; /* Box Plot Width */
+    height: 100%;
+    position: relative;
 }
 
-/* Row 2 Bottom Positions */
-#area_pcp {
-    width: 59%;
-    height: 46vh;
-    top: 52vh; /* 6vh (top) + 46vh (row1) + 1vh gap */
-    left: 0;
-}
+/* --- GRID ASSIGNMENTS --- */
+/* Top Left */
+#area_tsne { grid-column: 1 / 2; grid-row: 1 / 2; }
 
-#area_bump {
-    width: 40%;
-    height: 46vh;
-    top: 52vh;
-    left: 59%;
-}
+/* Top Right (Unified) */
+#area_combined { grid-column: 2 / 3; grid-row: 1 / 2; }
 
-/* --- CHART HEADERS --- */
-.chart-header {
-  position: absolute;
-  top: 1vh;
-  left: 1vw;
-  font-weight: 600;
-  font-size: 1.8vh; /* Responsive text size */
-  color: #555;
-  opacity: 0.8;
-  pointer-events: none;
-  z-index: 10;
-}
+/* Bottom Left */
+#area_pcp { grid-column: 1 / 2; grid-row: 2 / 3; }
 
-/* --- RANKING CHART STYLES --- */
+/* Bottom Right */
+#area_bump { grid-column: 2 / 3; grid-row: 2 / 3; }
+
+/* --- D3 CONTAINER FIXES --- */
+/* Ensure SVGs fill their new parents */
+#sub_bubble_container > svg,
+#sub_boxplot_container > svg,
+#area_tsne > svg,
+#area_pcp > div {
+    width: 100%;
+    height: 100%;
+}
 
 .ranking-controls-container {
-    position: absolute;
-    top: 1vh;
-    left: 1vw;
-    right: 1vw;
-    height: 60px; /* Space for controls */
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    z-index: 20;
-}
-
-.ranking-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-#genreSelect {
-    font-size: 11px;
-    padding: 2px;
-}
-
-.active-genres-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    overflow-y: auto;
-    max-height: 40px; /* Scroll if too many tags */
-}
-
-.genre-tag {
-    display: inline-flex;
-    align-items: center;
-    background: #f8f9fa;
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-size: 10px;
-    border: 1px solid #ddd;
-    box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
-}
-
-.genre-tag span {
-    margin-right: 5px;
-    font-weight: 600;
-}
-
-.genre-tag button {
-    background: none;
-    border: none;
-    color: #999;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 12px;
-    padding: 0;
-    line-height: 1;
-}
-
-.genre-tag button:hover {
-    color: red;
-}
-
-.ranking-tooltip {
-    position: absolute;
-    background: rgba(0,0,0,0.8);
-    color: white;
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    pointer-events: none;
-    z-index: 1000;
-}
-
-.rank-line {
-    cursor: pointer;
+    top: 55px !important; /* Adjust for header */
 }
