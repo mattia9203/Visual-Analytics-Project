@@ -14,16 +14,36 @@ body {
 .pointer { cursor: pointer; }
 
 /* --- MAIN LAYOUT (CSS Grid) --- */
+
 #all {
     width: 100%;
     height: 100%;
-    padding: 12px;
+    padding: 0.5vh; 
     display: grid;
-    /* TWO COLUMNS: Left (35%) and Right (65%) */
+    
     grid-template-columns: 45% 55%;
-    /* TWO ROWS: Top (55%) and Bottom (45%) */
-    grid-template-rows: 55% 45%; 
-    gap: 12px;
+    
+    grid-template-rows: 4vh 52vh 1fr; 
+    
+    gap: 1vh;
+}
+
+#top-bar {
+    grid-column: 1 / -1;
+    grid-row: 1 / 2;
+    
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    /* Spotify-inspired Dark Gradient */
+    background-color: white;
+    color: white;
+    
+    width: 100%;
+    padding: 0 1.5vw; /* More breathing room */
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* subtle shadow depth */
+    z-index: 10; /* Ensure it stays on top */
 }
 
 /* --- CARD STYLE --- */
@@ -55,23 +75,50 @@ body {
 }
 
 .chart-title {
-    font-weight: 700;
-    font-size: 16px;
-    color: #111827;
+    font-size: 2vh; 
+    font-weight: 800; 
+    letter-spacing: 0.05em; 
+    color: #1DB954;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.5vw; 
+    cursor: pointer;
 }
 
 .controls-row {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 1vw;
+    width: 100%;
+    padding: 0 1vw;
+}
+
+.controls-row .control-group:last-child {
+    margin-left: auto; 
 }
 
 .control-group {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: #6b7280;
+    gap: 0.5vw; 
+}
+
+.control-group label {
+    font-size: 1.4vh;
+    font-weight: 500;
+    color: #4b5563;
+}
+
+.control-group select {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.3vh; 
+    padding: 0.4vh 0.6vw; 
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background-color: #f9fafb;
+    outline: none;
+    cursor: pointer;
 }
 
 select {
@@ -86,13 +133,17 @@ select {
 }
 
 .counter-badge {
-    background-color: #eff6ff;
-    color: #1e40af;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
+    background-color: #f9fafb;
+    color: #374151;
+    padding: 0.3vh 1vw;
+    border-radius: 6px;
+    font-size: 1.5vh;
     font-weight: 600;
-    border: 1px solid #dbeafe;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 0.5vw;
+    height: 2.8vh;
 }
 
 /* --- COMBINED CONTENT (The Split View) --- */
@@ -118,17 +169,26 @@ select {
 }
 
 /* --- GRID ASSIGNMENTS --- */
-/* Top Left */
-#area_tsne { grid-column: 1 / 2; grid-row: 1 / 2; }
 
-/* Top Right (Unified) */
-#area_combined { grid-column: 2 / 3; grid-row: 1 / 2; }
+#area_tsne { 
+    grid-column: 1 / 2; 
+    grid-row: 2 / 3; /* Was 1/2 */
+}
 
-/* Bottom Left */
-#area_pcp { grid-column: 1 / 2; grid-row: 2 / 3; }
+#area_combined { 
+    grid-column: 2 / 3; 
+    grid-row: 2 / 3; /* Was 1/2 */
+}
 
-/* Bottom Right */
-#area_bump { grid-column: 2 / 3; grid-row: 2 / 3; }
+#area_pcp { 
+    grid-column: 1 / 2; 
+    grid-row: 3 / 4; /* Was 2/3 */
+}
+
+#area_bump { 
+    grid-column: 2 / 3; 
+    grid-row: 3 / 4; /* Was 2/3 */
+}
 
 /* --- D3 CONTAINER FIXES --- */
 /* Ensure SVGs fill their new parents */
@@ -143,3 +203,4 @@ select {
 .ranking-controls-container {
     top: 55px !important; /* Adjust for header */
 }
+

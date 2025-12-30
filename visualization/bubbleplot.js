@@ -1,11 +1,10 @@
-const margin = { top: 20, right: 30, bottom: 40, left: 50 };
-const LEGEND_SPACE = 220; // Increased space for the dual legend
-
+let margin = {}; 
+let maxRadius = 0; 
 let svg, xScale, yScale, xAxis, yAxis, legendGroup;
 let circles;
 let totalWidth, totalHeight; 
-let onBubbleClickCallback = null; // Store the callback function
-let selectedBubbleId = null;      // Track which bubble is selected
+let onBubbleClickCallback = null; 
+let selectedBubbleId = null;
 
 // Tooltip
 const tooltip = d3.select("body").append("div")
@@ -14,10 +13,10 @@ const tooltip = d3.select("body").append("div")
     .style("background", "rgba(255, 255, 255, 0.95)")
     .style("color", "#333")
     .style("border", "1px solid #333")
-    .style("padding", "8px")
+    .style("padding", "0.5vh") 
     .style("box-shadow", "2px 2px 5px rgba(0,0,0,0.2)")
     .style("border-radius", "0px")
-    .style("font-size", "12px")
+    .style("font-size", "1.2vh") 
     .style("pointer-events", "none")
     .style("opacity", 0);
 
@@ -31,6 +30,14 @@ export function initBubblePlot(containerId, data, onClick) {
     totalWidth = rect.width;
     totalHeight = rect.height;
 
+    // --- DYNAMIC MARGINS ---
+    margin = { 
+        top: totalHeight * 0.05,    
+        right: totalWidth * 0.05,   
+        bottom: totalHeight * 0.15, 
+        left: totalWidth * 0.10     
+    };
+
     const drawWidth = totalWidth - margin.left - margin.right;
     const drawHeight = totalHeight - margin.top - margin.bottom;
 
@@ -41,8 +48,9 @@ export function initBubblePlot(containerId, data, onClick) {
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    xScale = d3.scaleLinear().range([0, drawWidth]);
-    yScale = d3.scaleLinear().range([drawHeight, 0]);
+    // Scales 
+    xScale = d3.scaleLinear();
+    yScale = d3.scaleLinear();
 
     xAxis = svg.append("g").attr("class", "x-axis").attr("transform", `translate(0,${drawHeight})`);
     yAxis = svg.append("g").attr("class", "y-axis");
@@ -54,7 +62,6 @@ export function initBubblePlot(containerId, data, onClick) {
     updateBubblePlot(data, "valence", "energy", "none");
 }
 
-// 2. UPDATE AGGREGATION TO STORE RAW DATA
 function getAggregatedData(data, groupBy, xAttr, yAttr) {
     const binFn = (d) => {
         const val = d[groupBy];
@@ -72,122 +79,116 @@ function getAggregatedData(data, groupBy, xAttr, yAttr) {
             x: d3.mean(values, d => d[xAttr]), 
             y: d3.mean(values, d => d[yAttr]), 
             groupAttr: groupBy,
-            data: values // <--- Store the raw array of songs here
+            data: values
         };
     });
 }
 
-function drawLegend(rScale, colorScale, plotData, isNumeric) {
+// --- RESPONSIVE LEGEND ---
+function drawLegend(rScale, colorScale, plotData, isNumeric, legendW, legendH) {
     legendGroup.selectAll("*").remove();
     
-    // --- 1. SIZE LEGEND (Left Column) ---
+    const titleSize = "1.4vh";
+    const labelSize = "1.1vh";
+    
+    // Positions
+    const col1X = legendW * 0.15; 
+    const col2X = legendW * 0.55; 
+
+    // --- 1. SIZE LEGEND ---
     const maxCount = rScale.domain()[1];
-    // Create 5 steps for size: 20%, 40%, 60%, 80%, 100%
     const sizeSteps = [0.2, 0.4, 0.6, 0.8, 1.0].map(p => Math.max(1, Math.round(maxCount * p)));
     
-    // Title
     legendGroup.append("text")
         .attr("x", 0)
         .attr("y", 0)
-        .text("Song number:") 
-        .style("font-size", "12px")
+        .text("Songs:") 
+        .style("font-size", titleSize)
         .style("font-weight", "bold")
         .style("fill", "#000");
 
-    let currentY = 15;
+    let currentY = totalHeight * 0.04; 
+    
     sizeSteps.forEach((val) => {
         const r = rScale(val);
-        // Draw centered circle
         legendGroup.append("circle")
-            .attr("cx", 25) // Center of column
+            .attr("cx", col1X) 
             .attr("cy", currentY + r)
             .attr("r", r)
-            .style("fill", "#dcdcdc") // Light grey like image
+            .style("fill", "#dcdcdc") 
             .style("stroke", "none");
 
-        // Label below circle
-        currentY += (r * 2) + 12; // Move down past circle + padding
+        currentY += (r * 2) + (totalHeight * 0.035); 
         
-        // Use ranges for labels if possible, else just value
-        // For simplicity matching the image style:
-        let label = val; 
-        // Logic to create ranges like "1 - 839" based on previous step could be added here
-        // For now, simple count value:
         legendGroup.append("text")
-            .attr("x", 25)
-            .attr("y", currentY - 2) // Just below circle
+            .attr("x", col1X)
+            .attr("y", currentY - (totalHeight * 0.015)) 
             .attr("text-anchor", "middle")
             .text(val)
-            .style("font-size", "40%")
+            .style("font-size", labelSize)
             .style("fill", "#000");
     });
 
-
     // --- 2. COLOR LEGEND ---
-    const colX = 85; // Start X position for color column
-    
-    // Title
     legendGroup.append("text")
-        .attr("x", colX)
+        .attr("x", col2X)
         .attr("y", 0)
-        .text("Grouping range") 
-        .style("font-size", "70%")
+        .text("Range:") 
+        .style("font-size", titleSize)
         .style("font-weight", "bold")
         .style("fill", "#000");
 
-    const boxHeight = 20;
-    const boxWidth = 25;
-    let colY = 15;
+    // Increased Box Height for better spacing
+    const boxHeight = totalHeight * 0.045; 
+    const boxWidth = legendW * 0.15;
+    let colY = totalHeight * 0.04;
 
     if (isNumeric) {
-        // Create 10 bins for the numeric range
-        const domain = colorScale.domain(); // [min, max]
-        const min = domain[1]; // Note: we reversed domain earlier for colors
+        const domain = colorScale.domain(); 
+        const min = domain[1]; 
         const max = domain[0];
         const step = (max - min) / 10;
 
         for (let i = 0; i < 10; i++) {
             const rangeStart = Math.floor(min + (i * step));
             const rangeEnd = Math.floor(min + ((i + 1) * step));
-            // Get color for the midpoint of this bin
             const midPoint = (rangeStart + rangeEnd) / 2;
             
             legendGroup.append("rect")
-                .attr("x", colX)
+                .attr("x", col2X)
                 .attr("y", colY)
                 .attr("width", boxWidth)
                 .attr("height", boxHeight)
                 .style("fill", colorScale(midPoint))
                 .style("stroke", "#333")
-                .style("stroke-width", "1px");
+                .style("stroke-width", "0.5px");
 
             legendGroup.append("text")
-                .attr("x", colX + boxWidth + 5)
-                .attr("y", colY + 14)
+                .attr("x", col2X + boxWidth + (legendW * 0.02))
+                .attr("y", colY + (boxHeight / 2) + 1)
                 .text(`${rangeStart}-${rangeEnd}`)
-                .style("font-size", "11px")
+                .style("font-size", labelSize)
                 .style("alignment-baseline", "middle");
 
-            colY += boxHeight;
+            colY += boxHeight; // Matches increased box height
         }
     } else {
-        // Categorical (Genres)
         const categories = colorScale.domain();
         categories.forEach((cat) => {
             legendGroup.append("rect")
-                .attr("x", colX)
+                .attr("x", col2X)
                 .attr("y", colY)
                 .attr("width", boxWidth)
                 .attr("height", boxHeight)
                 .style("fill", colorScale(cat))
                 .style("stroke", "#333")
-                .style("stroke-width", "1px");
+                .style("stroke-width", "0.5px");
 
             legendGroup.append("text")
-                .attr("x", colX + boxWidth + 5)
-                .attr("y", colY + 14)
+                .attr("x", col2X + boxWidth + (legendW * 0.02))
+                .attr("y", colY + (boxHeight / 2) + 1)
                 .text(cat)
-                .style("font-size", "11px")
+                .style("font-size", labelSize)
                 .style("alignment-baseline", "middle");
 
             colY += boxHeight;
@@ -199,28 +200,32 @@ export function updateBubblePlot(data, xAttr, yAttr, groupBy) {
     const t = d3.transition().duration(1000);
     const isGrouped = groupBy !== "none";
     
-    // 1. Resize logic
-    const currentRightMargin = isGrouped ? (margin.right + LEGEND_SPACE) : margin.right;
-    const effectiveWidth = totalWidth - margin.left - currentRightMargin;
+    // --- DYNAMIC DIMENSIONS ---
+    const legendSpaceCalc = isGrouped ? (totalWidth * 0.28) : 0; 
+    const effectiveWidth = totalWidth - margin.left - margin.right - legendSpaceCalc;
+    const drawHeight = totalHeight - margin.top - margin.bottom;
+
+    // Max Radius
+    maxRadius = totalWidth * 0.035; 
+
     xScale.range([0, effectiveWidth]);
-    xAxis.transition(t).call(d3.axisBottom(xScale));
-    selectedBubbleId = null
-    // Handle Legend Visibility
+    yScale.range([drawHeight, 0]);
+
+    selectedBubbleId = null;
+
     if (isGrouped) {
         legendGroup
-            .attr("transform", `translate(${effectiveWidth + 60}, 40)`)
-            .transition(t)
-            .style("opacity", 1);
+            .attr("transform", `translate(${effectiveWidth + (totalWidth * 0.02)}, ${totalHeight * 0.02})`)
+            .transition(t).style("opacity", 1);
         d3.select("#song_counter").text(data.length);
     } else {
         legendGroup.transition(t).style("opacity", 0);
         d3.select("#song_counter").text(data.length);
     }
 
-    // 2. Prepare Data
     let plotData = isGrouped ? getAggregatedData(data, groupBy, xAttr, yAttr) : data;
 
-    // 3. COLOR SCALES
+    // Color Scales
     let colorScale;
     let isNumeric = false;
 
@@ -231,39 +236,37 @@ export function updateBubblePlot(data, xAttr, yAttr, groupBy) {
         isNumeric = !isNaN(parseFloat(sampleId));
 
         if (isNumeric) {
-            // Numeric: Light Blue -> Dark Blue gradient
             const domain = d3.extent(plotData, d => +d.id);
-            
             colorScale = d3.scaleLinear()
-                .domain(domain) // [min, max]
+                .domain(domain)
                 .range(["#eff3ff", "#084594"]); 
         } else {
-            // Categorical: Standard palette
             const categories = plotData.map(d => d.id).sort();
             colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(categories);
         }
     }
 
-    // 4. Update Axes
+    // Update Axes
     const xExtent = d3.extent(plotData, d => isGrouped ? d.x : d[xAttr]);
     const yExtent = d3.extent(plotData, d => isGrouped ? d.y : d[yAttr]);
+    
     xScale.domain(xExtent).nice();
     yScale.domain(yExtent).nice();
-    xAxis.transition(t).call(d3.axisBottom(xScale));
-    yAxis.transition(t).call(d3.axisLeft(yScale));
 
-    // 5. RADIUS SCALE
+    yAxis.transition(t).call(d3.axisLeft(yScale));
+    xAxis.transition(t).call(d3.axisBottom(xScale));
+
+    // Radius Scale
     const maxCount = d3.max(plotData, d => isGrouped ? d.count : 0);
+    const minRadius = totalWidth * 0.005; 
+
     const rScale = d3.scaleSqrt()
         .domain([0, maxCount])
-        .range([5, 45]); 
+        .range([minRadius, maxRadius]); 
 
-    // Draw Legend
-    if (isGrouped) {
-        drawLegend(rScale, colorScale, plotData, isNumeric);
-    }
+    if (isGrouped) drawLegend(rScale, colorScale, plotData, isNumeric, legendSpaceCalc, totalHeight);
 
-    // 6. DRAW CIRCLES
+    // Draw Circles
     circles = svg.selectAll(".bubble")
         .data(plotData, d => isGrouped ? d.id : (d.track_id || d.track_name));
 
@@ -281,63 +284,48 @@ export function updateBubblePlot(data, xAttr, yAttr, groupBy) {
     circles.merge(enter).transition(t)
         .attr("cx", d => xScale(isGrouped ? d.x : d[xAttr]))
         .attr("cy", d => yScale(isGrouped ? d.y : d[yAttr]))
-        .attr("r", d => isGrouped ? rScale(d.count) : 3) 
+        .attr("r", d => isGrouped ? rScale(d.count) : minRadius * 1.5) 
         .style("fill", d => isGrouped ? (isNumeric ? colorScale(+d.id) : colorScale(d.id)) : "#4682b4")
-        .style("opacity",0.8)
-        .style("stroke","#333");
+        .style("opacity", 0.8)
+        .style("stroke", "#333");
 
-    // NEW CLICK HANDLER
     circles.merge(enter).on("click", function(event, d) {
-        if (!isGrouped) return; // Only works for groups
-
-        // Check if this bubble is already selected
+        if (!isGrouped) return; 
         const isSelected = (selectedBubbleId === d.id);
-
         if (isSelected) {
-            // DESELECT: Reset everything
             selectedBubbleId = null;
             d3.selectAll(".bubble").transition().style("opacity", 0.8).style("stroke", "#333");
-            
-            // Notify main.js to show ALL data
             if (onBubbleClickCallback) onBubbleClickCallback(null); 
         } else {
-            // SELECT: Highlight this one, dim others
             selectedBubbleId = d.id;
-            
-            d3.selectAll(".bubble").transition().style("opacity", 0.2); // Dim all
-            d3.select(this).transition().style("opacity", 1).style("stroke", "black").style("stroke-width", 3); // Highlight clicked
-
-            // Notify main.js to show SUBSET data
-            // We pass 'd.data' which is the array of songs in this bubble
+            d3.selectAll(".bubble").transition().style("opacity", 0.2);
+            d3.select(this).transition().style("opacity", 1).style("stroke", "black").style("stroke-width", 3); 
             if (onBubbleClickCallback) onBubbleClickCallback(d.data);
         }
     });
 
     circles.exit().transition(t).attr("r", 0).remove();
-
-    // 7. TOOLTIPS
+    
+    // Tooltip
     circles.merge(enter)
         .on("mouseover", function(event, d) {
             d3.select(this).style("stroke", "#000").style("stroke-width", 2);
             tooltip.transition().duration(100).style("opacity", 1);
-
             let html = "";
             if (isGrouped) {
-                // Formatting based on type
                 let idDisplay = isNumeric && groupBy === "Real_Year" ? `${d.id}s` : d.id;
-                
-                html = `<div style="font-weight:bold; border-bottom:1px solid #ccc; margin-bottom:5px; padding-bottom:3px;">
+                html = `<div style="font-weight:bold; border-bottom:1px solid #ccc; margin-bottom:3px; padding-bottom:2px;">
                             ${idDisplay}
                         </div>
-                        <div style="display:flex; justify-content:space-between; width:120px;">
+                        <div style="display:flex; justify-content:space-between; min-width:80px;">
                             <span>Songs:</span> <span style="font-weight:bold;">${d.count}</span>
                         </div>
-                        <div style="font-size:11px; color:#555; margin-top:5px;">
+                        <div style="font-size:1.1vh; color:#555; margin-top:3px;">
                             X: ${d.x.toFixed(2)} | Y: ${d.y.toFixed(2)}
                         </div>`;
             } else {
                 html = `<div style="font-weight:bold;">${d.track_name}</div>
-                        <div style="font-size:11px; color:#555;">${d.artists}</div>`;
+                        <div style="font-size:1.1vh; color:#555;">${d.artists}</div>`;
             }
             tooltip.html(html);
         })
@@ -351,52 +339,32 @@ export function updateBubblePlot(data, xAttr, yAttr, groupBy) {
             tooltip.transition().duration(200).style("opacity", 0);
         });
 }
-// bubbleplot.js
 
 export function highlightBubblePlot(subsetData) {
     const circles = d3.selectAll(".bubble");
-
-    // 1. INTERRUPT: Stop any ongoing animations immediately to prevent lag
     circles.interrupt();
 
-    // 2. CHECK: Is this a "Reset" (no selection)?
     if (!subsetData || subsetData.length === 0) {
         circles.transition().duration(200)
-            .style("opacity", 0.8)        // Restore default opacity
-            .style("stroke", "#333")      // Restore default grey border
-            .style("stroke-width", 1);    // <--- FIX: Restore thin border
+            .style("opacity", 0.8).style("stroke", "#333").style("stroke-width", 1);
         return;
     }
 
-    // 3. PREPARE LOOKUP
     const selectedNames = new Set(subsetData.map(d => d.track_id));
 
-    // 4. APPLY STYLES (One pass for performance)
     circles.each(function(d) {
-        // Determine if this bubble matches
         let isMatch = false;
         if (d.data) {
-            // Grouped Bubble: Check if ANY song inside is selected
             isMatch = d.data.some(song => selectedNames.has(song.track_id));
         } else {
-            // Single Bubble: Check name
             isMatch = selectedNames.has(d.track_id);
         }
 
         const el = d3.select(this);
-
         if (isMatch) {
-            // --- STATE: HIGHLIGHTED ---
-            el.transition().duration(200)
-                .style("opacity", 1)           // Fully visible
-                .style("stroke", "black")      // Black border
-                .style("stroke-width", 3);     // Thick border
+            el.transition().duration(200).style("opacity", 1).style("stroke", "black").style("stroke-width", 3);
         } else {
-            // --- STATE: DIMMED (The fix for "Gray Side") ---
-            el.transition().duration(200)
-                .style("opacity", 0.1)         // Faded
-                .style("stroke", "none")       // REMOVE stroke completely
-                .style("stroke-width", 0);     // <--- FIX: Ensure width is 0
+            el.transition().duration(200).style("opacity", 0.1).style("stroke", "none").style("stroke-width", 0);
         }
     });
 }

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>SpotyVis Dashboard</title>
+  <title>DataBass</title>
   <link type="text/css" rel="stylesheet" href="style.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://d3js.org/d3.v7.min.js"></script>
@@ -10,50 +10,72 @@
 
 <body id="body">
 
-  <div id="all">
-    
-    <div class="area card" id="area_tsne">
-        <div class="chart-header">
-            <span>Clustering (t-SNE)</span>
-        </div>
-        </div>
+    <div id="all">
 
-    <div class="area card" id="area_combined">
-        
-        <div class="chart-header-complex">
-            <span class="chart-title pointer" onClick="window.location.reload();">SpotyVis</span>
+        <div id="top-bar">
+            <div class="chart-title pointer" onClick="window.location.reload();">
+                <svg width="2.5vh" height="2.5vh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                    <path d="M21 12h2"></path>
+                    <path d="M21 8h2"></path>
+                    <path d="M21 16h2"></path>
+                </svg>
+                DATABASS
+            </div>
             
-            <div class="controls-row">
-                <div class="control-group">
-                    <label for="x-axis-select">X:</label>
-                    <select id="x-axis-select"></select>
-                </div>
-
-                <div class="control-group">
-                    <label for="y-axis-select">Y:</label>
-                    <select id="y-axis-select"></select>
-                </div>
-
-                <div class="control-group">
-                    <label for="group-by-select">Group:</label>
-                    <select id="group-by-select"></select>
-                </div>
-                
-                <div class="counter-badge">
-                    <span>Songs:</span>
-                    <b id="song_counter">0</b>
-                </div>
+            <div class="counter-badge">
+                <span style="opacity: 0.7;">Selected Songs:</span>
+                <b id="song_counter" style="color: #1DB954;">0</b>
             </div>
         </div>
-
-        <div class="combined-content">
-            <div id="sub_bubble_container"></div>
-            
-            <div id="sub_boxplot_container"></div>
+    
+        <div class="area card" id="area_tsne">
+            <div class="chart-header">
+                <span>Clustering (t-SNE)</span>
+            </div>
         </div>
-
+    
+        <div class="area card" id="area_combined">
+            <div class="chart-header-complex" style="justify-content: center;"> 
+                <div class="controls-row">
+                    <div class="control-group">
+                        <label for="x-axis-select">X:</label>
+                        <select id="x-axis-select"></select>
+                    </div>
+    
+                    <div class="control-group">
+                        <label for="y-axis-select">Y:</label>
+                        <select id="y-axis-select"></select>
+                    </div>
+    
+                    <div class="control-group">
+                        <label for="group-by-select">Group:</label>
+                        <select id="group-by-select"></select>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="combined-content">
+                <div id="sub_bubble_container"></div>
+                <div id="sub_boxplot_container"></div>
+            </div>
+        </div>
+    
+        <div class="area card" id="area_pcp">
+            <div class="chart-header">
+                <span>Feature Filter (PCP)</span>
+            </div>
+        </div>
+    
+        <div class="area card" id="area_bump">
+            <div class="chart-header">
+                <span>Genre Trends</span>
+            </div>
+        </div>
+    
     </div>
-
     <div class="area card" id="area_pcp">
         <div class="chart-header">
             <span>Feature Filter (PCP)</span>
