@@ -1,4 +1,4 @@
-const margin = { top: 30, right: 20, bottom: 20, left: 20 };
+const margin = { top: 30, right: 180, bottom: 20, left: 20 };
 
 let svg, xScale, yScale, circles, brushGroup;
 let colorScale; 
@@ -124,38 +124,33 @@ export function initTSNE(containerId, data, onBrush) {
     // 1. DEFINE YOUR CLUSTER NAMES HERE
     // Replace these strings with the real descriptions based on your Python analysis.
     const clusterNames = {
-        0: "Classic Rock & Roll", 
-        1: "Hard Rock & Metal",
-        2: "Urban & Rhythmic",
-        3: "Moody Alternative",
+        0: "Classic Rock & Pop", 
+        1: "Euphoric Mainstream Hits",
+        2: "Acoustic Pop & Country",
+        3: "High-Energy Alternative",
         4: "Energetic Pop/Rock",
-        5: "Happy Dance Pop",
-        6: "Funky Rock & Blues", 
+        5: "Melancholic Pop",
+        6: "Happy Classic Rock & Blues", 
         7: "Retro Dance & Rock"  
     };
 
     // --- 5. COMPACT LEGEND (BOTTOM-RIGHT, INSIDE) ---
 
-    // A. Configuration for "Small Form"
-    const legendItemSize = 15;   // Size of the color box (smaller)
-    const legendSpacing = 20;    // Space between rows (tighter)
-    const legendWidth = 120;     // Approximate width of the legend box
-    // Calculate total height based on number of items
-    const legendHeight = colorScale.domain().length * legendSpacing + 10; 
+    // --- 5. SIDEBAR LEGEND (MOVED OUTSIDE) ---
 
-    // B. Create Container positioned at Bottom-Right
-    // We subtract the legend dimensions from the total width/height to pin it to the corner
+    // A. Configuration
+    const legendItemSize = 12;   
+    const legendSpacing = 20;    
+    // We no longer need to calculate 'legendWidth' for positioning, 
+    // but we use the margin space we created (180px).
+
+    // B. Create Container positioned in the Right Margin
+    // "width" is the right edge of the graph. We move 10px past that.
     const legendContainer = svg.append("g")
         .attr("class", "legend")
-        .attr("transform", `translate(${width - legendWidth}, ${height - legendHeight})`);
+        .attr("transform", `translate(${width}, 20)`); // Top-Right, outside graph
 
-    // C. Add Semi-Transparent Background (Optional, but recommended for readability)
-    legendContainer.append("rect")
-        .attr("width", legendWidth)
-        .attr("height", legendHeight)
-        .attr("fill", "white")
-        .attr("opacity", 0.8)       // See-through background
-        .attr("rx", 5);             // Rounded corners
+    
 
     const legendData = colorScale.domain().sort(d3.ascending);
 
@@ -164,22 +159,21 @@ export function initTSNE(containerId, data, onBrush) {
         .data(legendData)
         .enter().append("g")
         .attr("class", "legend-row")
-        .attr("transform", (d, i) => `translate(5, ${i * legendSpacing + 5})`); // Minimal padding
+        .attr("transform", (d, i) => `translate(5, ${i * legendSpacing + 5})`);
 
-    // Draw Color Rect (Small)
+    // Draw Color Rect
     legendRows.append("rect")
         .attr("width", legendItemSize)
         .attr("height", legendItemSize)
         .attr("fill", d => colorScale(d));
 
-    // Draw Text Label (Small Font)
+    // Draw Text Label
     legendRows.append("text")
-        .attr("x", legendItemSize + 5) // Just a little gap after the rect
+        .attr("x", legendItemSize + 8) 
         .attr("y", legendItemSize - 1)
-        .style("font-size", "10px")     // Small font size
+        .style("font-size", "11px")    
         .style("fill", "#333")
         .style("font-family", "sans-serif")
-        // Use your name dictionary from before
         .text(d => `${d}: ${clusterNames[d] || "Unknown"}`);
 }
 
