@@ -128,7 +128,7 @@ export function initRankingPlot(containerId, rawData) {
         .attr("y", height + 30)
         .attr("text-anchor", "end")
         .style("font-size", "10px")
-        .style("fill", "#999");
+        .style("fill", "#000000ff");
 
     svg.append("text")
         .attr("transform", "rotate(-90)")
@@ -136,7 +136,7 @@ export function initRankingPlot(containerId, rawData) {
         .attr("x", 0)
         .attr("text-anchor", "end")
         .text("Avg Rank")
-        .style("fill", "#999")
+        .style("fill", "#000000ff")
         .style("font-size", "10px");
 
     // 6. INITIALIZATION
