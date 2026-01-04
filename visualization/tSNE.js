@@ -47,7 +47,7 @@ export function initTSNE(containerId, data, onBrush) {
 
     colorScale = d3.scaleOrdinal(d3.schemeSet2);
 
-    // --- 2. ADD BRUSH (MOVED UP) ---
+    // --- 2. BRUSH ---
     // We add the brush BEFORE the circles so the brush overlay is "behind" the circles.
     const brush = d3.brush()
         .extent([[0, 0], [width, height]])
@@ -57,8 +57,7 @@ export function initTSNE(containerId, data, onBrush) {
         .attr("class", "brush")
         .call(brush);
 
-    // --- 3. DRAW CIRCLES (MOVED DOWN) ---
-    // Now circles are drawn ON TOP of the brush layer.
+    // --- 3. DRAW CIRCLES ---
     circles = svg.selectAll(".tsne-dot")
         .data(data)
         .enter().append("circle")
@@ -122,8 +121,7 @@ export function initTSNE(containerId, data, onBrush) {
         if (onBrushCallback) onBrushCallback(selectedData);
     }
 
-    // 1. DEFINE YOUR CLUSTER NAMES HERE
-    // Replace these strings with the real descriptions based on your Python analysis.
+    // 4. DEFINE YOUR CLUSTER NAMES HERE
     const clusterNames = {
         0: "Classic Rock & Pop", 
         1: "Euphoric Mainstream Hits",
@@ -135,18 +133,14 @@ export function initTSNE(containerId, data, onBrush) {
         7: "Retro Dance & Rock"  
     };
 
-    // --- 5. COMPACT LEGEND (BOTTOM-RIGHT, INSIDE) ---
 
-    // --- 5. SIDEBAR LEGEND (MOVED OUTSIDE) ---
+    // --- 5. SIDEBAR LEGEND ---
 
     // A. Configuration
     const legendItemSize = 12;   
     const legendSpacing = 20;    
-    // We no longer need to calculate 'legendWidth' for positioning, 
-    // but we use the margin space we created (180px).
 
     // B. Create Container positioned in the Right Margin
-    // "width" is the right edge of the graph. We move 10px past that.
     const legendContainer = svg.append("g")
         .attr("class", "legend")
         .attr("transform", `translate(${width}, 20)`); // Top-Right, outside graph
@@ -178,7 +172,7 @@ export function initTSNE(containerId, data, onBrush) {
         .text(d => `${d}: ${clusterNames[d] || "Unknown"}`);
 }
 
-// --- UPDATED HIGHLIGHT FUNCTION (High Contrast Mode) ---
+// --- UPDATED HIGHLIGHT FUNCTION ---
 export function highlightTSNE(subsetData) {
     console.log("t-SNE Highlight received:", subsetData ? subsetData.length : "null");
 
@@ -188,7 +182,6 @@ export function highlightTSNE(subsetData) {
             .transition().duration(200)
             .style("opacity", 0.6)
             .style("fill", d => colorScale(d.cluster_label))
-            //.style("fill", d => colorScale(d.track_genre || "Unknown"))
             .attr("r", 3)
             .style("stroke", "none");
         return;
@@ -196,25 +189,23 @@ export function highlightTSNE(subsetData) {
 
     const selectedNames = new Set(subsetData.map(d => d.track_id));
 
-    // 1. DIM EVERYTHING TO NEAR INVISIBLE
     circles
         .transition().duration(200)
-        .style("opacity", 0.02)       // Almost invisible
-        .attr("r", 1)                 // Tiny dots
-        .style("fill", "#cccccc")     // Grey
+        .style("opacity", 0.02)       
+        .attr("r", 1)                 
+        .style("fill", "#cccccc")     
         .style("stroke", "none");
 
-    // 2. FILTER MATCHES
+    // FILTER MATCHES
     const matches = circles.filter(d => selectedNames.has(d.track_id));
 
-    // 3. HIGHLIGHT WITH GIANT DOTS
+    // HIGHLIGHT WITH GIANT DOTS
     matches
-        .raise() // Pull to front layer
+        .raise() 
         .transition().duration(200)
         .style("opacity", 1)
         .style("fill", d => colorScale(d.cluster_label))
-        //.style("fill", d => colorScale(d.track_genre || "Unknown")) 
-        .attr("r", 8)                 // HUGE radius (easy to see)
+        .attr("r", 8)                 
         .style("stroke", "black")
         .style("stroke-width", 2);
 }

@@ -36,7 +36,7 @@ export function initPCP(containerId, data, onBrush) {
         .style("height", "1.5vh")       
         .style("font-size", "0.5vw")    
         .style("padding", "0")
-        .style("line-height", "1.5vh")  // Center text vertically
+        .style("line-height", "1.5vh")  
         .style("border", "1px solid #ccc")
         .style("background", "white")
         .style("border-radius", "4px")
@@ -45,7 +45,7 @@ export function initPCP(containerId, data, onBrush) {
         .style("font-weight", "bold")
         .on("mouseover", function() { d3.select(this).style("background", "#f0f0f0").style("color", "red"); })
         .on("mouseout", function() { d3.select(this).style("background", "white").style("color", "#333"); })
-        .on("click", resetSelection);   // Click handler
+        .on("click", resetSelection);   
 
     svg = container.append("svg")
         .attr("width", "100%")
@@ -58,7 +58,7 @@ export function initPCP(containerId, data, onBrush) {
     y = {};
     features.forEach(name => {
         y[name] = d3.scaleLinear()
-            .domain([0, 100]) // <--- CHANGE: Force all axes to 0-100
+            .domain([0, 100]) 
             .range([height, 0]);
     });
 
@@ -108,7 +108,7 @@ export function initPCP(containerId, data, onBrush) {
         .style("font-weight", "bold")
         .style("cursor", "move");
 
-    // 6. ADD BRUSHES (The Filtering Feature)
+    // 6. ADD BRUSHES 
     const brushWidth = 20;
     
     axisGroup.append("g")
@@ -138,7 +138,6 @@ function pathFunction(d) {
 
 function resetSelection() {
     // 1. Clear Brushes Visuals
-    // We select all brush groups and invoke the move method with null
     d3.selectAll(".brush").each(function() {
         d3.select(this).call(d3.brushY().move, null);
     });
@@ -167,14 +166,11 @@ function brushed(event, feature, data) {
 
     // 2. Filter Data
     // A song is selected if it falls inside the brush for EVERY active feature
-    // Iterate over all lines to find matches
     const matches = [];
     
     foreground.style("display", function(d) {
         const isMatch = Array.from(activeBrushes.entries()).every(([key, range]) => {
             const val = y[key](d[key]); 
-            // Invert y-axis logic for brush check? No, d3 brush gives pixel coordinates.
-            // y scale converts value to pixels.
             return val >= range[0] && val <= range[1];
         });
         
@@ -182,7 +178,7 @@ function brushed(event, feature, data) {
         return isMatch ? null : "none";
     });
 
-    // 3. Send Filtered Data back to main.js (to update t-SNE)
+    // 3. Send Filtered Data back to main.js (to update other graphs)
     if (onBrushCallback) {
         if (activeBrushes.size === 0) {
              onBrushCallback(null); // Reset if no brushes
@@ -201,9 +197,6 @@ function brushed(event, feature, data) {
 export function updatePCP(selectedData) {
     // If t-SNE selects points, we clear local brushes to avoid conflict
     if (activeBrushes.size > 0) {
-        // Optional: clear brushes here if you want t-SNE to override
-        // d3.selectAll(".brush").call(d3.brushY().move, null);
-        // activeBrushes.clear();
         resetBtn.style("display", "none");
     }
 
