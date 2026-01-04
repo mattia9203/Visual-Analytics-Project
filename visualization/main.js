@@ -42,7 +42,6 @@ function loadData() {
 
         // 1. Bubble Plot
         initBubblePlot("#sub_bubble_container", globalData, (subsetData) => {
-            // Logic when Bubble is clicked (Filter t-SNE?)
             const dataToUse = subsetData || globalData;
 
             const xVal = d3.select("#x-axis-select").property("value");
@@ -50,29 +49,27 @@ function loadData() {
 
             updateBoxPlots(dataToUse, xVal, yVal);
 
-            // Note: You can also update counters here
             d3.select("#song_counter").text(dataToUse.length);
         });
 
         // 2. Box Plots
         initBoxPlots("#sub_boxplot_container", globalData); 
 
-        // 3. Parallel Coordinates (Updated Init)
-        // Now we pass a callback function as the 3rd argument
+        // 3. Parallel Coordinates
         initPCP("#area_pcp", globalData, (pcpFilteredData) => {
             console.log("PCP Filtered:", pcpFilteredData ? pcpFilteredData.length : "All");
             
-            // 1. Filter t-SNE
+            // Filter t-SNE
             highlightTSNE(pcpFilteredData);
 
-            // B. Filter Bubble Plot (NEW!)
+            // Filter Bubble Plot 
             highlightBubblePlot(pcpFilteredData);
 
-            // 2. Update Counter
+            // Update Counter
             const count = pcpFilteredData ? pcpFilteredData.length : globalData.length;
             d3.select("#song_counter").text(count);
 
-            // 3. Update Boxplots
+            // Update Boxplots
             const dataToUse = pcpFilteredData || globalData;
             updateBoxPlots(dataToUse, 
                 d3.select("#x-axis-select").property("value"), 
@@ -80,7 +77,7 @@ function loadData() {
             );
         }); 
 
-        // 3. t-SNE (New!)
+        // 3. t-SNE
         initTSNE("#area_tsne", globalData, (brushedData) => {
             console.log("Brushed Songs:", brushedData ? brushedData.length : "None");
             
@@ -88,7 +85,7 @@ function loadData() {
             // If brushedData exists, we will update the other charts to show ONLY these songs
             const dataToUse = brushedData || globalData;
             
-            // B. Filter Bubble Plot (NEW!)
+            // Filter Bubble Plot
             highlightBubblePlot(brushedData);
 
             // Update counter
@@ -100,9 +97,6 @@ function loadData() {
                 d3.select("#y-axis-select").property("value")
             );
 
-            // you will call updatePCP(dataToUse) here to calculate the Centroid.
-            // --- TRIGGER THE ANALYTIC VIEW ---
-            // This satisfies the "Triggered Analytics" requirement
             updatePCP(brushedData);
         });
         initRankingPlot("#area_bump", rankingData);
@@ -110,8 +104,6 @@ function loadData() {
 }
 
 function populateDropdowns() {
-    // ... (Keep your existing dropdown code exactly the same) ...
-    // Just copy the function from your previous main.js
     const optionsHTML = AUDIO_FEATURES.map(d => 
         `<option value="${d}">${d.replace(/_/g, " ").toUpperCase()}</option>`
     ).join("");
