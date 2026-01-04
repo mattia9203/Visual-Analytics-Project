@@ -45,24 +45,31 @@ export function initTSNE(containerId, data, onBrush) {
         .domain(d3.extent(data, d => +d.tsne_y)).nice()
         .range([height, 0]);
 
-    //const genres = Array.from(new Set(data.map(d => d.track_genre || "Unknown"))).sort();
-    //colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(genres);
+    colorScale = d3.scaleOrdinal(d3.schemeSet2);
 
-    // NEW (K-Means Colors):
-    // The clusters are numbers 0-7, so we just need a color scheme for numbers.
-    colorScale = d3.scaleOrdinal(d3.schemeSet2); // or schemeCategory10
-    // --- 2. DRAW CIRCLES ---
+    // --- 2. ADD BRUSH (MOVED UP) ---
+    // We add the brush BEFORE the circles so the brush overlay is "behind" the circles.
+    const brush = d3.brush()
+        .extent([[0, 0], [width, height]])
+        .on("start brush end", brushed);
+
+    brushGroup = svg.append("g")
+        .attr("class", "brush")
+        .call(brush);
+
+    // --- 3. DRAW CIRCLES (MOVED DOWN) ---
+    // Now circles are drawn ON TOP of the brush layer.
     circles = svg.selectAll(".tsne-dot")
         .data(data)
         .enter().append("circle")
         .attr("class", "tsne-dot")
         .attr("cx", d => xScale(+d.tsne_x))
         .attr("cy", d => yScale(+d.tsne_y))
-        .attr("r", 3)                 
+        .attr("r", 3)
         .style("fill", d => colorScale(d.cluster_label))
-        .style("opacity", 0.7)        
-        .style("stroke", "none");     // <--- Ensure no outline
-
+        .style("opacity", 0.7)
+        .style("stroke", "none");
+    
     // --- 3. TOOLTIPS ---
     circles.on("mouseover", function(event, d) {
         if (d3.select(this).style("opacity") > 0.2) {
@@ -87,14 +94,8 @@ export function initTSNE(containerId, data, onBrush) {
         tooltip.transition().style("opacity", 0);
     });
 
-    // --- 4. BRUSHING ---
-    const brush = d3.brush()
-        .extent([[0, 0], [width, height]])
-        .on("start brush end", brushed);
-
-    brushGroup = svg.append("g")
-        .attr("class", "brush")
-        .call(brush);
+    
+    
 
     function brushed(event) {
         if (!event.selection) {
