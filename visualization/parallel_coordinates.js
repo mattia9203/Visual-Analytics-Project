@@ -53,6 +53,15 @@ export function initPCP(containerId, data, onBrush) {
         .attr("viewBox", `0 0 ${rect.width} ${rect.height}`)
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
+    
+    // --- ADD THIS STYLE BLOCK HERE ---
+    svg.append("defs").append("style").text(`
+        .brush .selection {
+            stroke: red !important;
+            stroke-width: 3px; 
+            fill-opacity: 0.2; /* Optional: makes the box slightly visible */
+        }
+    `);
 
     // 2. Build Scales
     y = {};
