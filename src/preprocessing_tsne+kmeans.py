@@ -25,26 +25,26 @@ features = [
 # we just handle missing values (if any) and pass it directly to t-SNE.
 data_matrix = df[features].fillna(0)
 
-# 4. RUN t-SNE (The "Map")
+# 4. RUN t-SNE
 print("Running t-SNE on pre-normalized data...")
 tsne = TSNE(
     n_components=2, 
     perplexity=40, 
     n_iter=1000, 
-    random_state=42, 
+    random_state=42, #The seed for the random number generator. 
+                        #guarantees that every time you run this code, you get the exact same coordinates
     init='pca', 
     learning_rate='auto',
     verbose=1
 )
 
-# CHANGED: We pass 'data_matrix' directly instead of 'data_scaled'
 tsne_results = tsne.fit_transform(data_matrix)
 
 # Add t-SNE coordinates to dataframe
 df['tsne_x'] = tsne_results[:, 0]
 df['tsne_y'] = tsne_results[:, 1]
 
-# 5. RUN K-MEANS (The "Colors")
+# 5. RUN K-MEANS 
 # We cluster based on the t-SNE coordinates.
 print("Running K-Means Clustering (finding 8 groups)...")
 
