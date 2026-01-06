@@ -27,7 +27,7 @@ export function initPCP(containerId, data, onBrush) {
     // --- ADD RESET BUTTON ---
     resetBtn = container.append("button")
         .text("RESET")
-        .style("display", "none")       // Hidden by default
+        .style("display", "none")       
         .style("position", "absolute")
         .style("top", "5px")
         .style("right", "10px")
@@ -54,7 +54,6 @@ export function initPCP(containerId, data, onBrush) {
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
     
-    // --- ADD THIS STYLE BLOCK HERE ---
     svg.append("defs").append("style").text(`
         .brush .selection {
             stroke: red !important;
