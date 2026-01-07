@@ -121,7 +121,7 @@ export function initTSNE(containerId, data, onBrush) {
         if (onBrushCallback) onBrushCallback(selectedData);
     }
 
-    // 4. DEFINE YOUR CLUSTER NAMES HERE
+    // 4. DEFINE CLUSTER NAMES 
     const clusterNames = {
         0: "Classic Rock & Pop", 
         1: "Euphoric Mainstream Hits",
