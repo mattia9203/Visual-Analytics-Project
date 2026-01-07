@@ -58,7 +58,7 @@ export function initPCP(containerId, data, onBrush) {
         .brush .selection {
             stroke: red !important;
             stroke-width: 3px; 
-            fill-opacity: 0.2; /* Optional: makes the box slightly visible */
+            fill-opacity: 0.2; 
         }
     `);
 

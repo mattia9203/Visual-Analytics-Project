@@ -29,7 +29,8 @@ data_matrix = df[features].fillna(0)
 print("Running t-SNE on pre-normalized data...")
 tsne = TSNE(
     n_components=2, 
-    perplexity=40, 
+    perplexity=40, #It is a guess about the number of close neighbors each point has. 
+    #It controls how the algorithm balances attention between local details and global structure.
     n_iter=1000, 
     random_state=42, #The seed for the random number generator. 
                         #guarantees that every time you run this code, you get the exact same coordinates
@@ -48,7 +49,8 @@ df['tsne_y'] = tsne_results[:, 1]
 # We cluster based on the t-SNE coordinates.
 print("Running K-Means Clustering (finding 8 groups)...")
 
-kmeans = KMeans(n_clusters=8, random_state=0, n_init=10)
+kmeans = KMeans(n_clusters=8, random_state=0, n_init=10) #Use the seed 0 for your random number generator
+#Run the whole process 10 separate times with different starting positions, and keep only the best result
 predicted_clusters = kmeans.fit_predict(tsne_results) 
 
 # Save these new labels
