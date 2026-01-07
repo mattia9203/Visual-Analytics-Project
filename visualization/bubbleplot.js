@@ -25,7 +25,7 @@ export function initBubblePlot(containerId, data, onClick) {
     d3.select(containerId).selectAll("*").remove();
 
     const container = d3.select(containerId);
-    const rect = container.node().getBoundingClientRect();
+    const rect = container.node().getBoundingClientRect();        //usefull to handle correctly the space     
     
     totalWidth = rect.width;
     totalHeight = rect.height;
@@ -62,6 +62,7 @@ export function initBubblePlot(containerId, data, onClick) {
     updateBubblePlot(data, "valence", "energy", "none");
 }
 
+//transforms the songs data in 'bubble'
 function getAggregatedData(data, groupBy, xAttr, yAttr) {
     const binFn = (d) => {
         const val = d[groupBy];

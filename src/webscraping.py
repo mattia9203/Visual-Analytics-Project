@@ -6,9 +6,7 @@ import time
 import random
 import os
 
-# ==========================================
-# 1. DATASET CONFIGURATION
-# ==========================================
+# DATASET CONFIGURATION
 INPUT_CSV = 'dataset/merged_common_songs.csv'              
 OUTPUT_CSV = 'dataset/charts_whosampled.csv'   
 ARTIST_COL = 'artists'
@@ -26,9 +24,7 @@ scraper = cloudscraper.create_scraper()
 current_wait_limit = 60  
 reached_songs_count = 0  
 
-# ==========================================
-# 2. SMART CLEANING FUNCTIONS
-# ==========================================
+# SMART CLEANING FUNCTIONS
 
 def clean_artist_for_url(artist_name):
     #Takes only the first artist and cleans it for the URL.
@@ -48,7 +44,7 @@ def clean_song_for_url(song_title):
     #Deletes all elements within parentheses and cleans for URL, preserving , and :
     title = str(song_title)
     
-    # 1. DELETE elements within '()' and '[]' entirely
+    # 1. DELETE elements within '()' and '[]' 
     title = re.sub(r'\(.*?\)', '', title)
     title = re.sub(r'\[.*?\]', '', title)
     
@@ -58,13 +54,10 @@ def clean_song_for_url(song_title):
     
     # 3. Handle apostrophes and punctuation
     title = title.replace("'", "%27")
-    # Updated Regex: Allow letters, numbers, dashes, %, colons, and commas
     clean_text = re.sub(r'[^\w\s\-%:.!?,]', '', title)
     return clean_text.strip().replace(' ', '-')
 
-# ==========================================
-# 3. SCRAPING ENGINE
-# ==========================================
+# SCRAPING ENGINE
 
 def scrape_whosampled(artist, song):
     global current_wait_limit, reached_songs_count
@@ -118,11 +111,11 @@ def scrape_whosampled(artist, song):
                         elif "remixed in" in text: data["Remixed_By_Count"] = count
                         elif "remix of" in text: data["Is_Remix_Of"] = 1
                 
-                print(f"   📊 Found: Year={data['Real_Year']} | S:{data['Sampled_By_Count']} | C:{data['Covered_By_Count']} | R:{data['Remixed_By_Count']}")
+                print(f" Found: Year={data['Real_Year']} | S:{data['Sampled_By_Count']} | C:{data['Covered_By_Count']} | R:{data['Remixed_By_Count']}")
                 return data
                 
             elif response.status_code == 403:
-                print(f"⛔ [403] Blocked. Waiting {current_wait_limit}s...")
+                print(f" [403] Blocked. Waiting {current_wait_limit}s...")
                 time.sleep(current_wait_limit)
                 current_wait_limit *= 2 
                 return {"URL_Found": False}
@@ -131,15 +124,11 @@ def scrape_whosampled(artist, song):
             
     return {"URL_Found": False}
 
-# ==========================================
-# 4. EXECUTION
-# ==========================================
-
-
+# EXECUTION
 
 try:
     df_raw = pd.read_csv(INPUT_CSV)
-    # Check only unique artist+song pairs (the 2624 pairs)
+    # Check only unique artist+song pairs
     df_unique = df_raw[[ARTIST_COL, SONG_COL]].drop_duplicates()
     print(f"📂 Processing {len(df_unique)} unique artist+song pairs.")
 except FileNotFoundError:

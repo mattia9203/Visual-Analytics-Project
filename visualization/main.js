@@ -27,7 +27,7 @@ function loadData() {
                 obj.track_id = `song_${index}`; // Generate unique ID if missing
             }
             AUDIO_FEATURES.forEach(ft => {
-                if (ft !== "track_genre") obj[ft] = +d[ft] || 0;
+                if (ft !== "track_genre") obj[ft] = +d[ft] || 0;         // (+) forces the value to be a number (to prevent math errors)
                 else obj[ft] = d[ft];
             });
             return obj;
@@ -42,6 +42,7 @@ function loadData() {
 
         // 1. Bubble Plot
         initBubblePlot("#sub_bubble_container", globalData, (subsetData) => {
+            //subset data is the data of the group's bubble we clicked
             const dataToUse = subsetData || globalData;
 
             const xVal = d3.select("#x-axis-select").property("value");
@@ -103,6 +104,7 @@ function loadData() {
     });
 }
 
+// dinamically builds the user interface controls based on our data columns
 function populateDropdowns() {
     const optionsHTML = AUDIO_FEATURES.map(d => 
         `<option value="${d}">${d.replace(/_/g, " ").toUpperCase()}</option>`
