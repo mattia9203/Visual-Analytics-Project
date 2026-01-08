@@ -36,7 +36,6 @@ body {
     justify-content: space-between;
     align-items: center;
     
-    /* Spotify-inspired Dark Gradient */
     background-color: white;
     color: white;
     
@@ -146,7 +145,7 @@ select {
     height: 2.8vh;
 }
 
-/* --- COMBINED CONTENT (The Split View) --- */
+/* --- COMBINED CONTENT --- */
 .combined-content {
     flex-grow: 1; /* Fill remaining card space */
     display: flex; /* Side-by-side layout */
@@ -172,26 +171,24 @@ select {
 
 #area_tsne { 
     grid-column: 1 / 2; 
-    grid-row: 2 / 3; /* Was 1/2 */
+    grid-row: 2 / 3; 
 }
 
 #area_combined { 
     grid-column: 2 / 3; 
-    grid-row: 2 / 3; /* Was 1/2 */
+    grid-row: 2 / 3; 
 }
 
 #area_pcp { 
     grid-column: 1 / 2; 
-    grid-row: 3 / 4; /* Was 2/3 */
+    grid-row: 3 / 4; 
 }
 
 #area_bump { 
     grid-column: 2 / 3; 
-    grid-row: 3 / 4; /* Was 2/3 */
+    grid-row: 3 / 4; 
 }
 
-/* --- D3 CONTAINER FIXES --- */
-/* Ensure SVGs fill their new parents */
 #sub_bubble_container > svg,
 #sub_boxplot_container > svg,
 #area_tsne > svg,
@@ -201,6 +198,6 @@ select {
 }
 
 .ranking-controls-container {
-    top: 55px !important; /* Adjust for header */
+    top: 55px !important; 
 }
 

@@ -30,7 +30,7 @@ export function initBubblePlot(containerId, data, onClick) {
     totalWidth = rect.width;
     totalHeight = rect.height;
 
-    // --- DYNAMIC MARGINS ---
+    // Dynamic margins
     margin = { 
         top: totalHeight * 0.05,    
         right: totalWidth * 0.05,   
@@ -201,8 +201,8 @@ export function updateBubblePlot(data, xAttr, yAttr, groupBy) {
     const t = d3.transition().duration(1000);
     const isGrouped = groupBy !== "none";
     
-    // --- DYNAMIC DIMENSIONS ---
-    const legendSpaceCalc = isGrouped ? (totalWidth * 0.28) : 0; 
+    // DYNAMIC DIMENSIONS
+    const legendSpaceCalc = isGrouped ? (totalWidth * 0.28) : 0;          //check if we need to reserve space for the legend
     const effectiveWidth = totalWidth - margin.left - margin.right - legendSpaceCalc;
     const drawHeight = totalHeight - margin.top - margin.bottom;
 
@@ -224,7 +224,7 @@ export function updateBubblePlot(data, xAttr, yAttr, groupBy) {
         d3.select("#song_counter").text(data.length);
     }
 
-    let plotData = isGrouped ? getAggregatedData(data, groupBy, xAttr, yAttr) : data;
+    let plotData = isGrouped ? getAggregatedData(data, groupBy, xAttr, yAttr) : data;        //if group by active then we call getAggregatedData to compress the songs into a bubble objects           
 
     // Color Scales
     let colorScale;
@@ -238,12 +238,12 @@ export function updateBubblePlot(data, xAttr, yAttr, groupBy) {
 
         if (isNumeric) {
             const domain = d3.extent(plotData, d => +d.id);
-            colorScale = d3.scaleLinear()
+            colorScale = d3.scaleLinear()                                       //create a gradient from light blue to dark blue
                 .domain(domain)
                 .range(["#eff3ff", "#084594"]); 
         } else {
             const categories = plotData.map(d => d.id).sort();
-            colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(categories);
+            colorScale = d3.scaleOrdinal(d3.schemeCategory10).domain(categories);                    //assing different color for each group
         }
     }
 
@@ -269,7 +269,7 @@ export function updateBubblePlot(data, xAttr, yAttr, groupBy) {
 
     // Draw Circles
     circles = svg.selectAll(".bubble")
-        .data(plotData, d => isGrouped ? d.id : (d.track_id || d.track_name));
+        .data(plotData, d => isGrouped ? d.id : (d.track_id || d.track_name));           
 
     const enter = circles.enter().append("circle")
         .attr("class", "bubble")
@@ -282,6 +282,7 @@ export function updateBubblePlot(data, xAttr, yAttr, groupBy) {
         .style("stroke-width", isGrouped ? 1 : 0.5)
         .style("cursor", "pointer");
 
+    //allow us to have a smoothly animation when we change x or y
     circles.merge(enter).transition(t)
         .attr("cx", d => xScale(isGrouped ? d.x : d[xAttr]))
         .attr("cy", d => yScale(isGrouped ? d.y : d[yAttr]))
@@ -290,6 +291,7 @@ export function updateBubblePlot(data, xAttr, yAttr, groupBy) {
         .style("opacity", 0.8)
         .style("stroke", "#333");
 
+    //handle the case when we click on a bubble (in group by case)
     circles.merge(enter).on("click", function(event, d) {
         if (!isGrouped) return; 
         const isSelected = (selectedBubbleId === d.id);
@@ -305,9 +307,9 @@ export function updateBubblePlot(data, xAttr, yAttr, groupBy) {
         }
     });
 
-    circles.exit().transition(t).attr("r", 0).remove();
+    circles.exit().transition(t).attr("r", 0).remove();     //remove data that are no longer in the chart
     
-    // Tooltip
+    // Handle the mouse over a dot (or bubble) functionality
     circles.merge(enter)
         .on("mouseover", function(event, d) {
             d3.select(this).style("stroke", "#000").style("stroke-width", 2);
@@ -341,26 +343,30 @@ export function updateBubblePlot(data, xAttr, yAttr, groupBy) {
         });
 }
 
+//Handle the interaction with other charts
 export function highlightBubblePlot(subsetData) {
     const circles = d3.selectAll(".bubble");
     circles.interrupt();
 
-    if (!subsetData || subsetData.length === 0) {
+    //Restore the original chart if no subset data selected
+    if (!subsetData || subsetData.length === 0) {       
         circles.transition().duration(200)
             .style("opacity", 0.8).style("stroke", "#333").style("stroke-width", 1);
         return;
     }
 
-    const selectedNames = new Set(subsetData.map(d => d.track_id));
+    const selectedNames = new Set(subsetData.map(d => d.track_id));           //transform the list of filtered songs into a set (computational time decreased)
 
+    //Check which bubbles are related to a song selected (also in the group by case)
     circles.each(function(d) {
         let isMatch = false;
         if (d.data) {
-            isMatch = d.data.some(song => selectedNames.has(song.track_id));
+            isMatch = d.data.some(song => selectedNames.has(song.track_id));          //in the group by case, we need to check if a bubble contains SOME song matched
         } else {
             isMatch = selectedNames.has(d.track_id);
         }
 
+        //Allow us to see the differences between selected and not selected dots (or bubbles) 
         const el = d3.select(this);
         if (isMatch) {
             el.transition().duration(200).style("opacity", 1).style("stroke", "black").style("stroke-width", 3);

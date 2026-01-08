@@ -5,7 +5,7 @@ const boxWidth = 40; // Box is always 40px wide
 let svg, height, width;
 let gX, gY; 
 
-// --- COMPUTATION LOGIC ---
+// Computation logic
 function computeBoxStats(data, attr) {
     const values = data
         .map(d => d[attr])
@@ -23,7 +23,7 @@ function computeBoxStats(data, attr) {
     return { min, q1, median, q3, max, attr };
 }
 
-// --- INITIALIZATION ---
+// Initialization
 export function initBoxPlots(containerId, data) {
     d3.select(containerId).selectAll("*").remove();
 
@@ -39,14 +39,12 @@ export function initBoxPlots(containerId, data) {
 
     const halfWidth = width / 2;
 
-    // --- LEFT PLOT (X-Axis Variable) ---
-    // Anchored strictly at margin.left
+    // Left plot (X-Axis Variable)
     gX = svg.append("g")
         .attr("id", "boxplot-x")
         .attr("transform", `translate(${margin.left}, ${margin.top})`);
         
-    // --- RIGHT PLOT (Y-Axis Variable) ---
-    // Anchored strictly at halfWidth + margin.left
+    // Right plot (Y-Axis Variable) ---
     gY = svg.append("g")
         .attr("id", "boxplot-y")
         .attr("transform", `translate(${halfWidth + margin.left}, ${margin.top})`);
@@ -55,13 +53,13 @@ export function initBoxPlots(containerId, data) {
     updateBoxPlots(data, "valence", "energy");
 }
 
-// --- DRAWING LOGIC ---
+// Drawing logic
 function drawSingleBoxPlot(group, stats, plotHeight) {
     group.selectAll("*").remove(); 
 
     if (!stats) return;
 
-    // 1. TITLE (Fixed Position)
+    // Title 
     group.append("text")
         .attr("x", boxDist) 
         .attr("y", -20)
@@ -71,20 +69,18 @@ function drawSingleBoxPlot(group, stats, plotHeight) {
         .style("fill", "#555")
         .text(stats.attr.charAt(0).toUpperCase() + stats.attr.slice(1));
 
-    // 2. SCALE (Dynamic Domain, Fixed Range)
-    // This handles both "0-100" and "1950-2023" automatically
+    // Scale
     const yScale = d3.scaleLinear()
         .domain([stats.min, stats.max]) 
         .range([plotHeight, 0])
         .nice();
 
-    // 3. AXIS (Fixed Position)
-    // The axis line stays at x=0. Only the numbers change.
+    // Axis
     group.call(d3.axisLeft(yScale).ticks(5));
 
-    // 4. DRAW BOX PLOT ELEMENTS
+    // Draw box plot elements
     // All elements are positioned relative to 'boxDist'
-    
+
     // Vertical Range Line (Min to Max)
     group.append("line")
         .attr("x1", boxDist)
@@ -116,6 +112,7 @@ function drawSingleBoxPlot(group, stats, plotHeight) {
     });
 }
 
+//Update the chart if we change the features
 export function updateBoxPlots(data, xAttr, yAttr) {
     const plotHeight = height - margin.top - margin.bottom;
 
