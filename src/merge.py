@@ -1,17 +1,13 @@
 import pandas as pd
 
-# File containing your scraped WhoSampled data (Year, Counts)
 SCRAPED_FILE = '../dataset/merged_common_songs.csv'
 
-# Original Kaggle file containing Audio Features (Energy, Valence, etc.)
 FEATURES_FILE = '../dataset/dataset.csv'
 
-# Output file ready for D3.js
-OUTPUT_FILE = '../dataset/final_imputed_data.csv' # Overwriting or creating new
+OUTPUT_FILE = '../dataset/final_imputed_data.csv' 
 
 # LOAD DATA
 
-print(" Loading datasets...")
 df_scraped = pd.read_csv(SCRAPED_FILE)
 df_features = pd.read_csv(FEATURES_FILE)
 
@@ -28,7 +24,7 @@ cols_to_add = [
 # Filter the features dataset
 df_subset = df_features[cols_to_add]
 
-# If 'Drake - Hotline Bling' appears 5 times in merged_common_songs.csv, we only want 1 version 
+# Ifa song appears 5 times in merged_common_songs.csv, we only want 1 version 
 df_subset = df_subset.drop_duplicates(subset=['artists', 'track_name'])
 
 #  PERFORM MERGE
@@ -49,6 +45,4 @@ missing_ids = df_merged['track_id'].isna().sum()
 if missing_ids > 0:
     print(f" Warning: {missing_ids} songs did not match and have no Audio Features.")
 
-
-# Save to CSV
 df_merged.to_csv(OUTPUT_FILE, index=False)

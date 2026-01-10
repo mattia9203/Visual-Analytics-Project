@@ -13,111 +13,82 @@ let viewEnd = 2021;
 
 export function initRankingPlot(containerId, rawData) {
     rawDataGlobal = rawData; 
-
-    // 1. Clear existing
     const container = d3.select(containerId);
     container.selectAll("*").remove();
 
-    // 2. CONTROLS CONTAINER
-    const controlsDiv = container.append("div")
-        .style("position", "absolute")
-        .style("top", "10px")
-        .style("left", "50px")
-        .style("z-index", "10")
-        .style("display", "flex")
-        .style("gap", "15px")
-        .style("align-items", "center");
+    // 1. GET CONTAINER DIMENSIONS FIRST
+    const rect = container.node().getBoundingClientRect();
+    const totalWidth = rect.width;
+    const totalHeight = rect.height;
 
-    // GENRE SELECTOR
+    // 2. DYNAMIC MARGINS
+    const margin = {
+        top: totalHeight * 0.15,   
+        right: totalWidth * 0.15,   
+        bottom: totalHeight * 0.10, 
+        left: totalWidth * 0.08     
+    };
+
+    width = totalWidth - margin.left - margin.right;
+    height = totalHeight - margin.top - margin.bottom;
+
+    // 3. CONTROLS CONTAINER
+    const controlsDiv = container.append("div")
+        .attr("class", "ranking-toolbar"); 
+
     const dropdown = controlsDiv.append("select")
         .attr("id", "genreSelect")
-        .style("font-size", "11px")
-        .style("padding", "4px")
-        .style("border-radius", "4px")
-        .style("border", "1px solid #ccc")
-        .style("background", "white");
+        .attr("class", "genre-select");
 
-    // TIME INPUT
     const yearContainer = controlsDiv.append("div")
-        .style("display", "flex")
-        .style("align-items", "center")
-        .style("background", "white")
-        .style("padding", "2px 5px")
-        .style("border-radius", "4px")
-        .style("border", "1px solid #ccc")
-        .style("box-shadow", "0 1px 2px rgba(0,0,0,0.05)");
-
-    yearContainer.append("span")
-        .text("📅 Time:")
-        .style("font-size", "11px")
-        .style("font-weight", "bold")
-        .style("margin-right", "5px")
-        .style("color", "#555");
+        .attr("class", "time-group");
 
     const yearInput = yearContainer.append("input")
+        .attr("class", "time-input") 
         .attr("type", "text") 
-        .attr("placeholder", "1990 or 1990-2000")
-        .style("border", "none")
-        .style("outline", "none")
-        .style("font-size", "11px")
-        .style("width", "110px") 
-        .style("color", "#333");
+        .attr("placeholder", "YYYY or Range");
 
     const goBtn = yearContainer.append("button")
-        .text("Go")
-        .style("border", "none")
-        .style("background", "#4682b4")
-        .style("color", "white")
-        .style("border-radius", "3px")
-        .style("font-size", "10px")
-        .style("padding", "3px 8px")
-        .style("margin-left", "5px")
-        .style("cursor", "pointer")
+        .attr("class", "go-btn")
+        .html("➜") 
         .on("click", () => handleInput(yearInput.property("value")));
-
-    const resetBtn = controlsDiv.append("button")
-        .text("← Back to History")
+        
+    const resetBtn = controlsDiv.append("div")
         .attr("id", "resetViewBtn")
+        .text("Reset")
         .style("display", "none") 
-        .style("border", "1px solid #ccc")
-        .style("background", "#f8f9fa")
-        .style("color", "#333")
-        .style("border-radius", "4px")
-        .style("font-size", "11px")
-        .style("padding", "4px 8px")
+        .style("font-size", "1.1vh")
+        .style("margin-left", "0.5vw")
+        .style("color", "#6b7280")
         .style("cursor", "pointer")
+        .style("text-decoration", "underline")
         .on("click", () => {
             yearInput.property("value", ""); 
             switchToHistoryView();
         });
 
-    // 3. CHART SETUP
-    const rect = container.node().getBoundingClientRect();
-    width = rect.width - margin.left - margin.right;
-    height = rect.height - margin.top - margin.bottom;
-
+    // 4. SVG SETUP
     svg = container.append("svg")
         .attr("width", "100%")
         .attr("height", "100%")
-        .attr("viewBox", `0 0 ${rect.width} ${rect.height}`)
+        .attr("viewBox", `0 0 ${totalWidth} ${totalHeight}`)
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // 4. SCALES
+    // 5. SCALES & AXES
     x = d3.scaleLinear().range([0, width]); 
     y = d3.scaleLinear().domain([1, 100]).range([0, height]);
     color = d3.scaleOrdinal(d3.schemeCategory10);
 
-    // 5. AXES
-    // Initialize X Axis Group
+    // Initialize X Axis
     svg.append("g")
         .attr("class", "x-axis")
         .attr("transform", `translate(0,${height})`);
 
-    // Initialize Y Axis Group
+    // Initialize Y Axis
     svg.append("g")
         .attr("class", "y-axis")
-        .call(d3.axisLeft(y).tickValues([1, 25, 50, 75, 100]).tickSize(-width))
+        .call(d3.axisLeft(y).tickValues([1, 25, 50, 75, 100]).tickSize(-width)) 
         .call(g => g.select(".domain").remove()) 
         .call(g => g.selectAll(".tick line").attr("stroke-opacity", 0.1));
 
@@ -125,24 +96,25 @@ export function initRankingPlot(containerId, rawData) {
     svg.append("text")
         .attr("class", "x-label")
         .attr("x", width)
-        .attr("y", height + 30)
+        .attr("y", height + (totalHeight * 0.07)) // Dynamic Y position
         .attr("text-anchor", "end")
-        .style("font-size", "10px")
-        .style("fill", "#000000ff");
+        .style("font-size", "1.2vh")
+        .style("fill", "#000");
 
     svg.append("text")
         .attr("transform", "rotate(-90)")
-        .attr("y", -30)
+        .attr("y", - (totalWidth * 0.05)) // Dynamic X offset
         .attr("x", 0)
         .attr("text-anchor", "end")
         .text("Avg Rank")
-        .style("fill", "#000000ff")
-        .style("font-size", "10px");
+        .style("fill", "#000")
+        .style("font-size", "1.2vh");
 
-    // 6. INITIALIZATION
-    switchToHistoryView(); 
+    // Initialize
     initControls(dropdown);
-
+    switchToHistoryView(); 
+    
+    // Add Enter key listener
     yearInput.on("keypress", function(event) {
         if (event.key === "Enter") {
             handleInput(this.value);
@@ -150,7 +122,7 @@ export function initRankingPlot(containerId, rawData) {
     });
 }
 
-// --- INPUT HANDLING ---
+// INPUT HANDLING
 
 function handleInput(inputVal) {
     const val = inputVal.trim();
@@ -182,7 +154,7 @@ function handleInput(inputVal) {
     }
 }
 
-// --- VIEW SWITCHING ---
+// VIEW SWITCHING
 
 function switchToHistoryView() {
     currentView = "history";
@@ -236,6 +208,7 @@ function switchToMonthlyView(year) {
     updateChart();
 }
 
+//Computation of the most occurred genres 
 function getTopGenres(data, n) {
     const counts = d3.rollup(data, v => v.length, d => d.track_genre);
     return Array.from(counts)
@@ -244,8 +217,8 @@ function getTopGenres(data, n) {
         .map(d => d[0]);
 }
 
-// --- DATA PROCESSING ---
-
+// DATA PROCESSING (keep only necessary data)
+//Iterates through every year for each genre
 function processDataRange(startYear, endYear) {
     const filtered = rawDataGlobal.filter(d => {
         const y = +d.date.split("-")[0];
@@ -259,7 +232,7 @@ function processDataRange(startYear, endYear) {
         const yearsMap = genreGroups.get(genre);
         const values = [];
         yearsMap.forEach((rows, year) => {
-            const avgRank = d3.mean(rows, r => +r.rank);
+            const avgRank = d3.mean(rows, r => +r.rank);             //average rank computation
             values.push({ x: year, y: avgRank, genre: genre });
         });
         values.sort((a, b) => a.x - b.x);
@@ -267,6 +240,7 @@ function processDataRange(startYear, endYear) {
     });
 }
 
+//Iterates through every month for each genre
 function processDataMonthly(yearData) {
     const genreGroups = d3.group(yearData, d => d.track_genre, d => +d.date.split("-")[1]);
 
@@ -283,7 +257,7 @@ function processDataMonthly(yearData) {
     });
 }
 
-// --- CHART RENDERING ---
+// CHART RENDERING
 
 function initControls(selectElement) {
     const allGenres = Array.from(new Set(rawDataGlobal.map(d => d.track_genre))).sort();
@@ -295,8 +269,15 @@ function initControls(selectElement) {
 
     selectElement.on("change", function() {
         const newGenre = this.value;
+
+        if (selectedGenres.length >= 10) {
+            alert("You have reached the maximum limit of 10 genres. Please remove one before adding another.");
+            this.value = "+ Add Genre"; 
+            return;
+        }
         if (newGenre && !selectedGenres.includes(newGenre)) {
             selectedGenres.push(newGenre);
+            d3.select("#resetViewBtn").style("display", "block");
             updateChart();
         }
         this.value = "+ Add Genre"; 
@@ -307,7 +288,7 @@ function updateChart() {
     const activeData = processedData.filter(d => selectedGenres.includes(d.genre));
     const xAxisGroup = svg.select(".x-axis");
 
-    // 1. AXIS LOGIC
+    // 1. AXIS LOGIC (handle monthly or year case)
     if (currentView === "monthly") {
         x.domain([1, 12]);
         xAxisGroup.transition().duration(750)
@@ -440,43 +421,52 @@ function updateLegend(activeData) {
         return lastA - lastB; 
     });
 
+    //  POSITION THE GROUP
+    const legendX = width + (d3.select("svg").node().getBoundingClientRect().width * 0.4);
+    
     const legendGroup = svg.selectAll(".legend-group").data([0]).join("g")
         .attr("class", "legend-group")
-        .attr("transform", `translate(${width + 10}, 0)`);
+        .attr("transform", `translate(${legendX}, 0)`); 
 
-    const legendItems = legendGroup.selectAll(".legend-item")
+    const legendItems = legendGroup.selectAll(".legend-pill")
         .data(sortedGenres, d => d.genre);
 
     legendItems.exit().transition().style("opacity", 0).remove();
 
     const itemEnter = legendItems.enter().append("g")
-        .attr("class", "legend-item")
-        .attr("transform", (d, i) => `translate(0, ${i * 20})`)
+        .attr("class", "legend-pill")
         .style("opacity", 0);
 
+    itemEnter.append("title")
+        .text(d => d.genre);
+
+    // DRAW PILLS
     itemEnter.append("rect")
-        .attr("width", 10).attr("height", 10).attr("y", -5).attr("rx", 2)
+        .attr("width", "7vw")   
+        .attr("height", "2.8vh")
+        .attr("rx", "1.6vh")
         .attr("fill", d => color(d.genre));
 
     itemEnter.append("text")
-        .attr("x", 15).attr("y", 4)
-        .text(d => d.genre)
-        .style("font-size", "11px").style("font-weight", "bold").style("fill", "#333");
+        .attr("class", "legend-text")
+        .attr("x", "0.8vw")
+        .attr("y", "1.9vh")
+        .text(d => d.genre.length > 10 ? d.genre.substring(0, 8) + ".." : d.genre)
+        .style("fill", "white");
 
     itemEnter.append("text")
-        .attr("class", "remove-btn")
-        .attr("x", 120).attr("y", 4)
+        .attr("class", "legend-remove")
+        .attr("x", "5.8vw")  
+        .attr("y", "1.9vh")
         .text("×")
-        .style("font-size", "14px").style("font-weight", "bold").style("fill", "#ccc").style("cursor", "pointer")
-        .on("mouseover", function() { d3.select(this).style("fill", "red"); })
-        .on("mouseout", function() { d3.select(this).style("fill", "#ccc"); })
         .on("click", (event, d) => {
             selectedGenres = selectedGenres.filter(g => g !== d.genre);
             updateChart();
         });
 
+    // SPACING 
     legendItems.merge(itemEnter)
         .transition().duration(750)
         .style("opacity", 1)
-        .attr("transform", (d, i) => `translate(0, ${i * 20})`);
+        .attr("transform", (d, i) => `translate(0, ${i * (height * 0.10)})`); 
 }

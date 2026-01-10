@@ -86,7 +86,7 @@ def scrape_whosampled(artist, song):
                     "Remixed_By_Count": 0, "Is_Remix_Of": 0
                 }
                 
-                label_div = soup.find("div", class_="label-details")
+                label_div = soup.find("div", class_="label-details")                        #label where is contained the year
                 if label_div:
                     meta_date = label_div.find("meta", itemprop="datePublished")
                     if meta_date: data["Real_Year"] = int(meta_date["content"])
@@ -100,7 +100,7 @@ def scrape_whosampled(artist, song):
 
                 sections = soup.find_all("header", class_="sectionHeader")
                 for s in sections:
-                    title_tag = s.find("h3", class_="section-header-title")
+                    title_tag = s.find("h3", class_="section-header-title")                  #section where is contained the information
                     if title_tag:
                         text = title_tag.text.strip().lower()
                         count = int(re.search(r'(\d+)', text).group(1)) if re.search(r'(\d+)', text) else 1
@@ -130,7 +130,7 @@ try:
     df_raw = pd.read_csv(INPUT_CSV)
     # Check only unique artist+song pairs
     df_unique = df_raw[[ARTIST_COL, SONG_COL]].drop_duplicates()
-    print(f"📂 Processing {len(df_unique)} unique artist+song pairs.")
+    print(f" Processing {len(df_unique)} unique artist+song pairs.")
 except FileNotFoundError:
     print(f" Error: {INPUT_CSV} not found.")
     exit()
@@ -138,6 +138,7 @@ except FileNotFoundError:
 results = []
 processed_ids = set()
 
+#Possibility to restart where interrupted the last time
 if os.path.exists(OUTPUT_CSV):
     print(" Resuming progress...")
     old_df = pd.read_csv(OUTPUT_CSV)
@@ -173,6 +174,6 @@ for col in ['Real_Year', 'Sampled_By_Count', 'Is_Sample_Of', 'Covered_By_Count',
     if col in final_df.columns: final_df[col] = final_df[col].astype('Int64')
 final_df.to_csv(OUTPUT_CSV, index=False)
 
-print(f"\n Finished! Total unique songs with year founded: {reached_songs_count}")
+print(f"\n Total unique songs with year founded: {reached_songs_count}")
 
 

@@ -7,7 +7,6 @@ output_file = '../dataset/final_imputed_data_normalized.csv'
 df = pd.read_csv(input_file)
 
 # 2. Define 0-1 Columns to Scale
-# These columns are standard probabilities from 0.0 to 1.0
 cols_to_scale = [
     'danceability', 
     'energy', 

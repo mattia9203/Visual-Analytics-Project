@@ -1,11 +1,11 @@
-/* --- GLOBAL RESET --- */
+/* GLOBAL RESET  */
 * { box-sizing: border-box; }
 
 body {
   font-family: 'Inter', sans-serif;
   margin: 0;
   overflow: hidden; 
-  background-color: #f3f4f6; /* Modern Light Grey */
+  background-color: #f3f4f6; 
   color: #1f2937;
   width: 100vw;
   height: 100vh;
@@ -13,7 +13,7 @@ body {
 
 .pointer { cursor: pointer; }
 
-/* --- MAIN LAYOUT (CSS Grid) --- */
+/*  MAIN LAYOUT (CSS Grid)  */
 
 #all {
     width: 100%;
@@ -40,12 +40,12 @@ body {
     color: white;
     
     width: 100%;
-    padding: 0 1.5vw; /* More breathing room */
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* subtle shadow depth */
-    z-index: 10; /* Ensure it stays on top */
+    padding: 0 1.5vw; 
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); 
+    z-index: 10; 
 }
 
-/* --- CARD STYLE --- */
+/* CARD STYLE */
 .card {
   background-color: white;
   border-radius: 12px;
@@ -58,15 +58,15 @@ body {
   position: relative;
 }
 
-/* --- HEADER & CONTROLS --- */
+/* HEADER & CONTROLS*/
 .chart-header, .chart-header-complex {
     padding: 0 16px;
-    height: 50px; /* Fixed height for header */
+    height: 50px; 
     border-bottom: 1px solid #f3f4f6;
     display: flex;
     align-items: center;
     background: #fff;
-    flex-shrink: 0; /* Prevent header from squishing */
+    flex-shrink: 0; 
 }
 
 .chart-header-complex {
@@ -145,29 +145,29 @@ select {
     height: 2.8vh;
 }
 
-/* --- COMBINED CONTENT --- */
+/* COMBINED CONTENT */
 .combined-content {
-    flex-grow: 1; /* Fill remaining card space */
-    display: flex; /* Side-by-side layout */
+    flex-grow: 1; 
+    display: flex; 
     width: 100%;
     height: 100%;
     position: relative;
 }
 
 #sub_bubble_container {
-    width: 65%; /* Bubble Plot Width */
+    width: 65%; 
     height: 100%;
-    border-right: 1px solid #f3f4f6; /* Divider */
+    border-right: 1px solid #f3f4f6; 
     position: relative;
 }
 
 #sub_boxplot_container {
-    width: 35%; /* Box Plot Width */
+    width: 35%; 
     height: 100%;
     position: relative;
 }
 
-/* --- GRID ASSIGNMENTS --- */
+/*  GRID ASSIGNMENTS  */
 
 #area_tsne { 
     grid-column: 1 / 2; 
@@ -199,5 +199,105 @@ select {
 
 .ranking-controls-container {
     top: 55px !important; 
+}
+
+/* RANKING CHART CONTROLS */
+.ranking-toolbar {
+    position: absolute;
+    top: 0.5vh;          
+    left: 4vw;
+    display: flex;
+    gap: 0.5vw;         
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 0.3vh 0.8vw; 
+    border-radius: 3vh;
+    box-shadow: 0 0.2vh 1vh rgba(0,0,0,0.08);
+    z-index: 50;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+/* Stylish Dropdown */
+.genre-select {
+    appearance: none;
+    background-color: #f3f4f6;
+    border: none;
+    padding: 0.3vh 0.5vw;       
+    padding-right: 1.5vw;       
+    border-radius: 1.5vh;
+    font-size: 1.1vh;         
+    font-weight: 600;
+    color: #374151;
+    cursor: pointer;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23555" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 0.5vw center;
+    background-size: 1.2vh;   
+}
+.genre-select:hover {
+    background-color: #e5e7eb;
+}
+
+/* Time Input Group */
+.time-group {
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 0.1vh solid #e5e7eb;
+    border-radius: 1.5vh;
+    padding: 0.1vh 0.4vw 0.1vh 0.6vw; 
+}
+.time-group:focus-within {
+    box-shadow: 0 0 0 0.2vh rgba(29, 185, 84, 0.2);
+    border-color: #1DB954;
+}
+
+.time-input {
+    border: none;
+    outline: none;
+    font-size: 1.1vh;
+    width: 5vw; 
+    color: #374151;
+    background: transparent;
+}
+
+.go-btn {
+    background: #1DB954;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 1.8vh;   
+    height: 1.8vh;
+    font-size: 0.9vh;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 0.5vw;
+}
+
+/* LEGEND PILLS  */
+.legend-pill rect {
+    stroke: white;
+    stroke-width: 0.2vh;
+    filter: drop-shadow(0 0.2vh 0.3vh rgba(0,0,0,0.1));
+}
+
+.legend-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 1vh; /* Responsive font */
+    font-weight: 600;
+    fill: white;
+    pointer-events: none;
+}
+
+.legend-remove {
+    font-size: 1.6vh;
+    font-weight: bold;
+    fill: rgba(255,255,255, 0.7);
+    cursor: pointer;
+}
+.legend-remove:hover {
+    fill: white;
 }
 

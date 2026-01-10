@@ -28,7 +28,6 @@ def standardize_artist(text):
     return text
 
 #  LOAD DATA 
-print(" Loading datasets...")
 try:
     df_sp = pd.read_csv(DATA_SPOTIFY)
     df_bb = pd.read_csv(DATA_BILLBOARD)
@@ -41,8 +40,6 @@ try:
 except FileNotFoundError:
     print(" Files not found.")
     exit()
-
-print("🧹 Standardizing Data...")
 
 # Clean Spotify
 df_sp['clean_song'] = df_sp['sp_song_raw'].apply(clean_song_title)
@@ -64,7 +61,7 @@ df_bb['spotify_match_id'] = df_bb['join_key'].apply(lambda x: x if x in spotify_
 exact_count = df_bb['spotify_match_id'].notnull().sum()
 print(f" Exact Matches Found (Rows): {exact_count}")
 
-#  FUZZY MATCHING 
+# FUZZY MATCHING 
 # Filter unique unmatched Billboard songs
 unmatched_bb_indices = df_bb[df_bb['spotify_match_id'].isnull()].index
 unique_unmatched_bb = df_bb.loc[unmatched_bb_indices].drop_duplicates(subset=['join_key'])
@@ -112,9 +109,6 @@ print(f" Fuzzy Recovered (Unique Songs): {fuzzy_recovered_count}")
 df_bb.loc[df_bb['join_key'].isin(fuzzy_matches.keys()), 'spotify_match_id'] = \
     df_bb['join_key'].map(fuzzy_matches)
 
-# FINAL MERGE 
-print(" Merging datasets...")
-
 # Filter Billboard to only rows that have a match
 df_bb_matched = df_bb[df_bb['spotify_match_id'].notnull()].copy()
 
@@ -143,8 +137,6 @@ cols_to_drop = [
 ]
 merged_df = merged_df.drop(columns=[c for c in cols_to_drop if c in merged_df.columns])
 
-# EXPORT and STATS 
-print(f" Saving to {OUTPUT_FILE}...")
 merged_df.to_csv(OUTPUT_FILE, index=False)
 
 # Calculate Unique Pairs
