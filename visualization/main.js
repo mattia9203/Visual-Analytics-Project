@@ -6,7 +6,7 @@ import { initRankingPlot } from "./rankingplot.js";
 
 const DATA_PATH = "../dataset/final_dataset_kmeans.csv"; 
 const RANKING_DATA_PATH = "../dataset/merged_common_songs.csv";
-const AUDIO_FEATURES = ["danceability", "energy", "loudness", "speechiness", "acousticness", "instrumentalness", "liveness", "valence", "popularity", "Year", "Sampled_By", "Is_Sample", "Covered_By", "Is_Cover" , "Remixed_By" ,"Is_Remix", "tsne_x", "tsne_y"]; // <--- ADD TSNE COLUMNS HERE
+const AUDIO_FEATURES = ["danceability", "energy", "loudness", "speechiness", "acousticness", "instrumentalness", "liveness", "valence", "popularity", "duration_ms" ,"Year", "Sampled_By", "Is_Sample", "Covered_By", "Is_Cover" , "Remixed_By" ,"Is_Remix", "tsne_x", "tsne_y"]; // <--- ADD TSNE COLUMNS HERE
 
 export let globalData = [];
 

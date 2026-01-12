@@ -247,13 +247,17 @@ export function updateBubblePlot(data, xAttr, yAttr, groupBy) {
         }
     }
 
+    let xExtent, yExtent;
     // Update Axes
-    const xExtent = d3.extent(plotData, d => isGrouped ? d.x : d[xAttr]);
-    const yExtent = d3.extent(plotData, d => isGrouped ? d.y : d[yAttr]);
-    
-    xScale.domain(xExtent).nice();
-    yScale.domain(yExtent).nice();
-
+    if (xAttr == "year" || xAttr == "duration_ms" || yAttr == "year" || yAttr == "duration_ms"){
+        xExtent = d3.extent(plotData, d => isGrouped  ? d.x : d[xAttr]);
+        yExtent = d3.extent(plotData, d => isGrouped ? d.y : d[yAttr]);
+    }else{
+        xExtent = d3.extent(data, d => +d[xAttr]);
+        yExtent = d3.extent(data, d => +d[yAttr]);
+    }
+    xScale.domain(xExtent[0] === undefined ? [0, 100] : xExtent).nice();
+    yScale.domain(yExtent[0] === undefined ? [0, 100] : yExtent).nice();
     yAxis.transition(t).call(d3.axisLeft(yScale));
     xAxis.transition(t).call(d3.axisBottom(xScale));
 
